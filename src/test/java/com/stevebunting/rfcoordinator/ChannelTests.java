@@ -376,6 +376,23 @@ class ChannelTests {
             assertSame(channel4, channelList.get(4));
         }
 
+        @DisplayName("by ID, then frequency")
+        @Test
+        final void testSortChannelListByIDThenFrequency() throws InvalidFrequencyException {
+            channel1 = new Channel(null, 600, equipment);
+            channel2 = new Channel(null, 700, equipment);
+            channel3 = new Channel(null, 200, equipment);
+            channel4 = new Channel(null, 900, equipment);
+            channel5 = new Channel(null, 500, equipment);
+            channelList = new ArrayList<>(Arrays.asList(channel1, channel2, channel3, channel4, channel5));
+            channelList.sort(Channel.sortByID());
+            assertSame(channel3, channelList.get(0));
+            assertSame(channel5, channelList.get(1));
+            assertSame(channel1, channelList.get(2));
+            assertSame(channel2, channelList.get(3));
+            assertSame(channel4, channelList.get(4));
+        }
+
         @DisplayName("by name")
         @Test
         final void testSortChannelListByName() {
@@ -385,6 +402,18 @@ class ChannelTests {
             assertSame(channel4, channelList.get(2));
             assertSame(channel5, channelList.get(3));
             assertSame(channel2, channelList.get(4));
+        }
+
+        @DisplayName("by name, then frequency")
+        @Test
+        final void testSortChannelListByNameThenFrequency() {
+            channelList.forEach(channel -> channel.setName("Name"));
+            channelList.sort(Channel.sortByName());
+            assertSame(channel3, channelList.get(0));
+            assertSame(channel5, channelList.get(1));
+            assertSame(channel1, channelList.get(2));
+            assertSame(channel2, channelList.get(3));
+            assertSame(channel4, channelList.get(4));
         }
     }
 }

@@ -72,6 +72,7 @@ class Channel implements Comparable<Channel> {
 
     // Comparator to sort channels by ID
     final private static class IDComparator implements Comparator<Channel> {
+        @Override
         public int compare(Channel a, Channel b) {
             int result = Integer.compare(a.getId(), b.getId());
             return result == 0 ? a.compareTo(b) : result;
@@ -83,6 +84,7 @@ class Channel implements Comparable<Channel> {
 
     // Comparator to sort channels by Name
     final private static class NameComparator implements Comparator<Channel> {
+        @Override
         public int compare(Channel a, Channel b) {
             int result = a.getName().compareToIgnoreCase(b.getName());
             return result == 0 ? a.compareTo(b) : result;
