@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+group 'com.stevebunting'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit test framework
+    def junitVersion = "5.7.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    // testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+
+    // Jackson JSON Parsing
+    def jacksonVersion = "2.11.2"
+    implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
