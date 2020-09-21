@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -13,12 +12,11 @@ import java.util.Collections;
 class CoordinationTests {
 
     final EquipmentProfiles equipmentProfiles = EquipmentProfiles.INSTANCE;
+    Coordination coordination;
 
     @DisplayName("contains methods that...")
     @Nested
     class CoordinationMethodTests {
-
-        Coordination coordination;
 
         @BeforeEach
         void setUp() {
@@ -173,8 +171,6 @@ class CoordinationTests {
     @Nested
     class IntermodulationCalculationTests {
 
-        Coordination coordination;
-
         @BeforeEach
         void setUp() {
             coordination = new Coordination();
@@ -305,7 +301,6 @@ class CoordinationTests {
         @Nested
         class ChannelConflictAnalysisTests {
 
-            Coordination coordination = new Coordination();
             final Equipment equipment = new Equipment("Test", "Device", 0, 1000, 1, 300, 100, 90, 0, 0, 50);
 
             @BeforeEach
@@ -395,7 +390,6 @@ class CoordinationTests {
         @Nested
         class IMConflictAnalysisTests {
 
-            Coordination coordination = new Coordination();
             final Equipment equipment = new Equipment("Test", "Device", 0, 1000, 25, 300, 100, 90, 0, 0, 50);
 
             @BeforeEach
@@ -481,7 +475,6 @@ class CoordinationTests {
     @Nested
     class CoordinationStressTests {
 
-        private Coordination coordination;
         private final EquipmentProfiles equipmentProfiles = EquipmentProfiles.INSTANCE;
 
         @BeforeEach
