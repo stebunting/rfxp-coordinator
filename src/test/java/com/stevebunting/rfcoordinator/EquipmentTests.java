@@ -14,7 +14,7 @@ class EquipmentTests {
     class EquipmentMethodTests {
 
         // Equipment object under test
-        Equipment equipment;
+        private Equipment equipment;
 
         @BeforeEach
         void setUp() {

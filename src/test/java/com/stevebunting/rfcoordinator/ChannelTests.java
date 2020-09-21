@@ -416,4 +416,42 @@ class ChannelTests {
             assertSame(channel4, channelList.get(4));
         }
     }
+
+    @DisplayName("contains static helper methods that...")
+    @Nested
+    class ChannelHelperTests {
+        @DisplayName("convert frequency in MHz to kHz")
+        @Test
+        final void testMHzToKHz() {
+            assertEquals(500550, Channel.mHzToKHz(500.550));
+            assertEquals(636200, Channel.mHzToKHz(636.2));
+            assertEquals(780559, Channel.mHzToKHz(780.558999273947234));
+            assertEquals(100000, Channel.mHzToKHz(100));
+            assertEquals(-689245, Channel.mHzToKHz(-689.245));
+        }
+
+        @DisplayName("convert frequency in kHz to MHz")
+        @Test
+        final void testKHzToMHz() {
+            assertEquals(640.240, Channel.kHzToMHz(640240));
+            assertEquals(489.124, Channel.kHzToMHz(489124));
+            assertEquals(224.009, Channel.kHzToMHz(224009));
+            assertEquals(0.0, Channel.kHzToMHz(0));
+            assertEquals(-0.789, Channel.kHzToMHz(-789));
+        }
+
+        @DisplayName("convert kHz <--> MHz without losing information")
+        @Test
+        final void testTwoWayConversions() {
+            final int numTests = 1000;
+            for (int i = 0; i < numTests; i++) {
+                int freq = TestHelpers.generateFrequency(470000, 800000, 1);
+                assertEquals(freq, Channel.mHzToKHz(Channel.kHzToMHz(freq)));
+            }
+            for (int i = 0; i < numTests; i++) {
+                double freq = Channel.kHzToMHz(TestHelpers.generateFrequency(470000, 800000, 1));
+                assertEquals(freq, Channel.kHzToMHz(Channel.mHzToKHz(freq)));
+            }
+        }
+    }
 }

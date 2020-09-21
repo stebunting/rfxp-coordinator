@@ -2,6 +2,7 @@ package com.stevebunting.rfcoordinator;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,13 @@ class EquipmentProfileTests {
         assertNotNull(equipmentProfiles.get(0));
         //noinspection ConstantConditions
         assertEquals(equipmentProfiles.get(0).toString(), "Generic IEM");
+    }
+
+    @DisplayName("can fail and supply single default Equipment type")
+    @Test
+    @Disabled
+    final void testEquipmentProfilesFailed() {
+        fail("Test needs to be written");
     }
 
     @DisplayName("gets null for invalid equipment indexes")

@@ -18,9 +18,11 @@ public enum EquipmentProfiles {
     private Equipment[] parseJson() {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(new File("src/main/resources/EquipmentProfiles.json"), Equipment[].class);
+            return mapper.readValue(new File("src/main/resources/data/EquipmentProfiles.json"), Equipment[].class);
         } catch (Exception e) {
-            return new Equipment[0];
+            return new Equipment[] {
+                    new Equipment(null, "Default", 0, 10000, 1,300, 100, 90, 0, 0, 50)
+            };
         }
     }
 

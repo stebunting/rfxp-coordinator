@@ -40,7 +40,7 @@ class Channel implements Comparable<Channel> {
     Channel(final Integer id, final double frequency, @NotNull final Equipment equipment)
             throws InvalidFrequencyException {
         if (equipment == null) {
-            throw new IllegalArgumentException("Equipment must not be null");
+            throw new IllegalArgumentException("A valid equipment profile must be supplied");
         }
         if (isEquipmentUntunable(mHzToKHz(frequency), equipment)) {
             throw new InvalidFrequencyException();
