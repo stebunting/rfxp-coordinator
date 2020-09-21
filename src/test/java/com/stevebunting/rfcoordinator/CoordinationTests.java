@@ -505,7 +505,6 @@ class CoordinationTests {
                     }
                 } else {
                     Collections.shuffle(channelIds);
-                    System.out.println(channelIds.size());
                     final int idToDelete = channelIds.remove(0);
                     Channel removedChannel = coordination.removeChannel(idToDelete);
                     assertNotNull(removedChannel);
@@ -525,7 +524,7 @@ class CoordinationTests {
             assertEquals(coordination.getNumChannels(), coordinationCheck.getNumChannels());
             assertEquals(coordination.getNumIntermods(), coordinationCheck.getNumIntermods());
 
-            // TODO This one has failed once
+            // TODO This one is failing
             assertEquals(coordination.getNumConflicts(), coordinationCheck.getNumConflicts());
 
             assertEquals(coordination.getNumConflictsOfType(Conflict.Type.CHANNEL_SPACING), coordinationCheck.getNumConflictsOfType(Conflict.Type.CHANNEL_SPACING));

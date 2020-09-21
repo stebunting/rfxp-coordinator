@@ -19,11 +19,12 @@ public class Coordination {
     private final ArrayList<Conflict> conflicts = new ArrayList<>();
 
     // Intermodulation Calculations to make
-    private boolean calculate2t3o = true;
-    private boolean calculate2t5o = true;
-    private boolean calculate2t7o = true;
-    private boolean calculate2t9o = true;
-    private boolean calculate3t3o = true;
+    private final boolean[] calculations = new boolean[] {
+            true, true, true, true, true
+    };
+
+    // Instantiate analyser
+    private final Analyser analyser = new Analyser();
 
     // Add new channel to coordination
     public final int addChannel(double frequency, Equipment equipment) throws InvalidFrequencyException {
@@ -35,8 +36,8 @@ public class Coordination {
         Channel newChannel = new Channel(id, frequency, equipment);
         int index = addChannelInPlace(newChannel);
 
-        List<Intermod> intermodList = calculateIntermods(newChannel);
-        analyse(index, intermodList);
+        List<Intermod> intermodList = analyser.calculateIntermods(channels, newChannel, calculations);
+        mergeConflicts(analyser.analyse(index, channels, intermodList, intermods));
         mergeIntermods(intermodList);
 
         idCounter++;
@@ -55,11 +56,11 @@ public class Coordination {
         channelToUpdate.setFreq(frequency);
 
         // Remove channel and intermodulation products
-        removeIntermods(channels.remove(index));
+        analyser.removeIntermods(channels.remove(index), intermods);
 
         // Insert Channel in new position
         addChannelInPlace(channelToUpdate);
-        calculateIntermods(channelToUpdate);
+        analyser.calculateIntermods(channels, channelToUpdate, calculations);
 
         return channelToUpdate;
     }
@@ -104,179 +105,10 @@ public class Coordination {
         }
         Channel removedChannel = channels.remove(index);
 
-        removeIntermods(removedChannel);
-        removeConflicts(removedChannel);
+        analyser.removeIntermods(removedChannel, intermods);
+        analyser.removeConflicts(removedChannel, conflicts);
 
         return removedChannel;
-    }
-
-    // Function to analyse new intermods
-    private void analyse(int newChannelIndex, List<Intermod> intermodList) {
-        final int firstIndexToFind = channels.size();
-        int nextChannelPointer = 0;
-        int nextImPointer = 0;
-
-        for (int i = 0; i < firstIndexToFind; i++) {
-            final Channel currentChannel = channels.get(i);
-            boolean nextChannelPointerSet = false;
-            boolean nextImPointerSet = false;
-
-            // Set next frequency in list, if currentFreq is the last frequency, set to null
-            // Use to set nextImPointer for iterating over intermods
-            final Channel nextChannel = i < firstIndexToFind - 1
-                    ? channels.get(i + 1)
-                    : null;
-
-            // Iterate over frequencies
-            if (i == newChannelIndex) {
-                for (int pointer = nextChannelPointer; pointer < firstIndexToFind; pointer++) {
-                    final Channel pointerChannel = channels.get(pointer);
-                    final int pointerFrequency = pointerChannel.getFreq();
-
-                    // Set point to start iterating over channels for nextFreq
-                    // Must be first and not last channel
-                    // Next frequency must be less than allowable channel spacing
-                    final int channelFrequency = currentChannel.getFreq();
-                    final int channelSpacing = currentChannel.getEquipment().getChannelSpacing();
-                    if (!nextChannelPointerSet && nextChannel != null && (nextChannel.getFreq() - pointerChannel.getFreq()) < nextChannel.getEquipment().getChannelSpacing()) {
-                        nextChannelPointer = pointer;
-                        nextChannelPointerSet = true;
-                    }
-
-                    // Add conflict if not pointing at current channel and pointer channel within channel spacing
-                    if (currentChannel != pointerChannel && Math.abs(channelFrequency - pointerFrequency) < channelSpacing) {
-                        addConflict(new Conflict(currentChannel, pointerChannel));
-                        addConflict(new Conflict(pointerChannel, currentChannel));
-                    }
-
-                    // Exit loop if pointer higher than channels spacing range
-                    if (pointerFrequency >= channelFrequency + channelSpacing) {
-                        break;
-                    }
-                }
-
-                for (Intermod intermod : intermods) {
-                    analyseIM(currentChannel, intermod);
-                    if (intermod.getFreq() >= currentChannel.getEquipment().getMaxImSpacing()) {
-                        break;
-                    }
-                }
-            } else {
-
-                // Iterate over intermods
-                for (int pointer = nextImPointer; pointer < intermodList.size(); pointer++) {
-                    Intermod currentIntermod = intermodList.get(pointer);
-
-                    // Set point to start iterating over intermods for nextFreq
-                    if (!nextImPointerSet && nextChannel != null && (nextChannel.getFreq() - currentIntermod.getFreq()) < nextChannel.getEquipment().getMaxImSpacing()) {
-                        nextImPointer = pointer;
-                        nextImPointerSet = true;
-                    }
-
-                    analyseIM(currentChannel, currentIntermod);
-
-                    // If current intermodulation is out of range of the highest IM spacing, move on to next frequency
-                    if (currentIntermod.getFreq() >= currentChannel.getFreq() + currentChannel.getEquipment().getMaxImSpacing()) {
-                        if (!nextImPointerSet) {
-                            nextImPointer = pointer;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // Compare channel to intermod and create conflict if necessary
-    private void analyseIM(final Channel channel, final Intermod currentIntermod) {
-        int spacing = Math.abs(channel.getFreq() - currentIntermod.getFreq());
-
-        // If current intermodulation not created by current frequency, check spacing
-        if (currentIntermod.getF1() != channel && currentIntermod.getF2() != channel && currentIntermod.getF3() != channel) {
-            int requiredSpacing;
-            switch (currentIntermod.getType()) {
-                case IM_2T3O:
-                    requiredSpacing = channel.getEquipment().get2t3oSpacing();
-                    break;
-
-                case IM_2T5O:
-                    requiredSpacing = channel.getEquipment().get2t5oSpacing();
-                    break;
-
-                case IM_2T7O:
-                    requiredSpacing = channel.getEquipment().get2t7oSpacing();
-                    break;
-
-                case IM_2T9O:
-                    requiredSpacing = channel.getEquipment().get2t9oSpacing();
-                    break;
-
-                case IM_3T3O:
-                default:
-                    requiredSpacing = channel.getEquipment().get3t3oSpacing();
-                    break;
-            }
-            if (spacing < requiredSpacing) {
-                addConflict(new Conflict(channel, currentIntermod));
-            }
-        }
-    }
-
-    private void removeConflicts(Channel channel) {
-        conflicts.removeIf(conflict -> {
-            if (conflict.getChannel() == channel
-                    || conflict.getConflictChannel() == channel
-                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF1() == channel)
-                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF2() == channel)
-                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF3() == channel)) {
-                conflict.getChannel().removeConflict(conflict);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    // Calculate intermodulations for a single channel
-    private List<Intermod> calculateIntermods(Channel channel1) {
-        final ArrayList<Intermod> newIntermods = new ArrayList<>();
-        final int numChannels = channels.size();
-        for (int i = 0; i < numChannels; i++) {
-            Channel channel2 = channels.get(i);
-
-            if (channel1.getId() != channel2.getId()) {
-                if (calculate2t3o) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, channel2, channel1, null));
-                }
-                if (calculate2t5o) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, channel2, channel1, null));
-                }
-                if (calculate2t7o) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, channel2, channel1, null));
-                }
-                if (calculate2t9o) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, channel2, channel1, null));
-                }
-                if (calculate3t3o) {
-                    for (int j = i + 1; j < numChannels; j++) {
-                        Channel channel3 = channels.get(j);
-
-                        if (channel1.getId() != channel3.getId()) {
-                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel1, channel2, channel3));
-                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel2, channel3, channel1));
-                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel3, channel1, channel2));
-                        }
-                    }
-                }
-            }
-        }
-        Collections.sort(newIntermods);
-        assert Helpers.isSorted(newIntermods);
-
-        return newIntermods;
     }
 
     // Merge list of intermods into main list
@@ -285,23 +117,12 @@ public class Coordination {
         Collections.sort(intermods);
     }
 
-    // Remove all intermods that are contributed to by a specific channel
-    private void removeIntermods(Channel channel) {
-        intermods.removeIf(intermod -> intermod.getF1() == channel
-                || intermod.getF2() == channel
-                || intermod.getF3() == channel);
-    }
-
-    // Method to add new conflict to array and channel
-    private void addConflict(Conflict conflict) {
-        conflicts.add(conflict);
-        conflict.getChannel().addConflict(conflict);
-    }
-
-    // Method to clear all conflicts from array and channels
-    private void clearConflicts() {
-        conflicts.clear();
-        channels.forEach(Channel::clearConflicts);
+    // Merge list of conflicts into main list
+    private void mergeConflicts(final List<Conflict> newConflicts) {
+        for (Conflict conflict : newConflicts) {
+            conflicts.add(conflict);
+            conflict.getChannel().addConflict(conflict);
+        }
     }
 
     // Get channel index from id, returns -1 if not found
@@ -356,42 +177,42 @@ public class Coordination {
     }
 
     public boolean getCalculate2t3o() {
-        return calculate2t3o;
+        return calculations[0];
     }
 
-    public void setCalculate2t3o(boolean calculate2t3o) {
-        this.calculate2t3o = calculate2t3o;
+    public void setCalculate2t3o(final boolean calculate2t3o) {
+        this.calculations[0] = calculate2t3o;
     }
 
     public boolean getCalculate2t5o() {
-        return calculate2t5o;
+        return calculations[1];
     }
 
-    public void setCalculate2t5o(boolean calculate2t5o) {
-        this.calculate2t5o = calculate2t5o;
+    public void setCalculate2t5o(final boolean calculate2t5o) {
+        this.calculations[1] = calculate2t5o;
     }
 
     public boolean getCalculate2t7o() {
-        return calculate2t7o;
+        return calculations[2];
     }
 
-    public void setCalculate2t7o(boolean calculate2t7o) {
-        this.calculate2t7o = calculate2t7o;
+    public void setCalculate2t7o(final boolean calculate2t7o) {
+        this.calculations[2] = calculate2t7o;
     }
 
     public boolean getCalculate2t9o() {
-        return calculate2t9o;
+        return calculations[3];
     }
 
-    public void setCalculate2t9o(boolean calculate2t9o) {
-        this.calculate2t9o = calculate2t9o;
+    public void setCalculate2t9o(final boolean calculate2t9o) {
+        this.calculations[3] = calculate2t9o;
     }
 
     public boolean getCalculate3t3o() {
-        return calculate3t3o;
+        return calculations[4];
     }
 
-    public void setCalculate3t3o(boolean calculate3t3o) {
-        this.calculate3t3o = calculate3t3o;
+    public void setCalculate3t3o(final boolean calculate3t3o) {
+        this.calculations[4] = calculate3t3o;
     }
 }
