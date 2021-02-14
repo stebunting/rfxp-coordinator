@@ -3,6 +3,8 @@ package com.stevebunting.rfcoordinator;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 class TestHelpers {
     // Generate a random integer within start and end bounds
     static int generateFrequency(int start, int end, int accuracy) {
@@ -17,6 +19,28 @@ class TestHelpers {
             assertTrue(frequency <= 900000);
             assertEquals(0, frequency % 25);
         }
+    }
+
+    static <E extends Comparable<E>> boolean isSorted(List<E> list) {
+        final int listSize = list.size();
+        for (int i = 0; i < listSize - 1; i++) {
+            if (list.get(i).compareTo(list.get(i + 1)) > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Function to calculate number of expected intermodulations from a number of channels
+    static int expectedIntermods(final int numChannels, Analyser.Calculate calculations) {
+        final int secondOrderMultiplier = 4 - (calculations.im2t3o ? 0 : 1)
+                - (calculations.im2t5o ? 0 : 1)
+                - (calculations.im2t7o ? 0 : 1)
+                - (calculations.im2t9o ? 0 : 1);
+        final int thirdOrderMultiplier = 1 - (calculations.im3t3o ? 0 : 1);
+        final int secondOrder = numChannels * (numChannels - 1) * secondOrderMultiplier;
+        final int thirdOrder = numChannels * (numChannels - 1) * (numChannels - 2) / 2 * thirdOrderMultiplier;
+        return secondOrder + thirdOrder;
     }
 
     // Function to calculate number of expected intermodulations from a number of channels

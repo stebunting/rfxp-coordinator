@@ -15,11 +15,11 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
     // Mockito
-    def mockitoVersion = "3.5.12"
+    def mockitoVersion = "3.7.9"
     testCompile "org.mockito:mockito-core:${mockitoVersion}"
 
     // Jackson JSON Parsing
-    def jacksonVersion = "2.11.2"
+    def jacksonVersion = "2.12.0"
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"

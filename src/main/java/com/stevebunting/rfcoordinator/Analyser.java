@@ -4,75 +4,148 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class Analyser {
+public class Analyser {
+    /**
+     * Class to define which intermodulations are required for the
+     * coordination. If an intermodulation is not required, it should not be
+     * calculated to optimise performance.
+     */
+    static class Calculate {
+        boolean im2t3o = true;
+        boolean im2t5o = true;
+        boolean im2t7o = true;
+        boolean im2t9o = true;
+        boolean im3t3o = true;
+    }
 
-    // Calculate intermodulations for a single channel
-    List<Intermod> calculateIntermods(final List<Channel> channels, final Channel channel1, final boolean[] calculations) {
+    /**
+     * Function to calculate all intermodulations between a single channel
+     * and a list of channels. The new channel may be included in the list
+     * of channels.
+     *
+     * @param channels a list of channels to compare new channel against
+     * @param newChannel channel to generate intermods against
+     * @param calculate object to specify which intermodulations will be
+     *                  calculated
+     * @return sorted list of intermodulations generated between newChannel and
+     * all other channels in channels list
+     */
+    static List<Intermod> calculateIntermods(final List<Channel> channels, final Channel newChannel, final Analyser.Calculate calculate) {
         final ArrayList<Intermod> newIntermods = new ArrayList<>();
         final int numChannels = channels.size();
+
         for (int i = 0; i < numChannels; i++) {
             Channel channel2 = channels.get(i);
 
-            if (channel1.getId() != channel2.getId()) {
-                if (calculations[0]) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, channel2, channel1, null));
+            if (newChannel != channel2) {
+                if (calculate.im2t3o) {
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, newChannel, channel2, null));
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, channel2, newChannel, null));
                 }
-                if (calculations[1]) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, channel2, channel1, null));
+                if (calculate.im2t5o) {
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, newChannel, channel2, null));
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, channel2, newChannel, null));
                 }
-                if (calculations[2]) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, channel2, channel1, null));
+                if (calculate.im2t7o) {
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, newChannel, channel2, null));
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, channel2, newChannel, null));
                 }
-                if (calculations[3]) {
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, channel1, channel2, null));
-                    newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, channel2, channel1, null));
+                if (calculate.im2t9o) {
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, newChannel, channel2, null));
+                    newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, channel2, newChannel, null));
                 }
-                if (calculations[4]) {
+                if (calculate.im3t3o) {
                     for (int j = i + 1; j < numChannels; j++) {
                         Channel channel3 = channels.get(j);
 
-                        if (channel1.getId() != channel3.getId()) {
-                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel1, channel2, channel3));
-                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel2, channel3, channel1));
-                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel3, channel1, channel2));
+                        if (newChannel != channel3) {
+                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, newChannel, channel2, channel3));
+                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel2, channel3, newChannel));
+                            newIntermods.add(new Intermod(Intermod.Type.IM_3T3O, channel3, newChannel, channel2));
                         }
                     }
                 }
             }
         }
         Collections.sort(newIntermods);
-        assert Helpers.isSorted(newIntermods);
-
         return newIntermods;
     }
 
-    // Remove all intermods that are contributed to by a specific channel
-    void removeIntermods(Channel channel, List<Intermod> intermods) {
+    /**
+     * Method to merge a new list of intermods into an existing list.
+     *
+     * @param mainList list of intermods to merge into
+     * @param newList list of intermods to insert
+     */
+    static void mergeIntermods(final List<Intermod> mainList, final List<Intermod> newList) {
+        mainList.addAll(newList);
+        Collections.sort(mainList);
+    }
+
+    /**
+     * Method to remove all intermodulations from a list that are contributed
+     * by a specific channel.
+     *
+     * @param channel channel object to test intermodulation list against
+     * @param intermods a list of intermodulations to be operated on
+     */
+    static void removeIntermods(final Channel channel, List<Intermod> intermods) {
         intermods.removeIf(intermod -> intermod.getF1() == channel
                 || intermod.getF2() == channel
                 || intermod.getF3() == channel);
     }
 
-    // Remove all conflicts contributed by a specific channel
-    void removeConflicts(Channel channel, List<Conflict> conflicts) {
-        conflicts.removeIf(conflict -> {
-            if (conflict.getChannel() == channel
-                    || conflict.getConflictChannel() == channel
-                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF1() == channel)
-                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF2() == channel)
-                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF3() == channel)) {
-                conflict.getChannel().removeConflict(conflict);
-                return true;
+    // Function to test one channel against an array (channel must be in array)
+    static List<Conflict> analyseChannelSpacing(final int newChannelIndex, final List<Channel> channels) {
+        ArrayList<Conflict> newConflicts = new ArrayList<>();
+
+        Channel channelUnderTest = channels.get(newChannelIndex);
+
+        for (Channel channel : channels) {
+            int difference = Math.abs(channel.getFreq() - channelUnderTest.getFreq());
+            int channelSpacing = channel.getEquipment().getChannelSpacing();
+            int newChannelSpacing = channelUnderTest.getEquipment().getChannelSpacing();
+            if (channel != channelUnderTest) {
+                if (difference < channelSpacing) {
+                    newConflicts.add(new Conflict(channel, channelUnderTest));
+                }
+                if (difference < newChannelSpacing) {
+                    newConflicts.add(new Conflict(channelUnderTest, channel));
+                }
             }
-            return false;
-        });
+        }
+        return newConflicts;
     }
 
+//    static List<Conflict> analyseIMSpacing(Channel newChannel, List<Intermod> intermods) {
+//        ArrayList<Conflict> newConflicts = new ArrayList<>();
+//        int loRange = newChannel.getFreq() - newChannel.getEquipment().getMaxImSpacing();
+//        int hiRange = newChannel.getFreq() + newChannel.getEquipment().getMaxImSpacing();
+//        int startPoint = findClosestIM(loRange, hiRange, intermods);
+//        System.out.println(startPoint);
+//        return newConflicts;
+//    }
+
+//    static int findClosestIM(int lo, int hi, List<Intermod> intermods) {
+//        return findClosestIM(lo, hi, intermods, 0, intermods.size());
+//    }
+
+//    static int findClosestIM(int lo, int hi, List<Intermod> intermods, int start, int end) {
+//        int midIndex = start + ((end - start) / 2);
+//        Intermod midIntermod = intermods.get(midIndex);
+//        if (midIntermod.getFreq() > lo && midIntermod.getFreq() < hi) {
+//            return midIndex;
+//        }
+//
+//        if (midIntermod.getFreq() >= hi) {
+//            return findClosestIM(lo, hi, intermods, start, midIndex - 1);
+//        } else if (midIntermod.getFreq() <= lo) {
+//            return findClosestIM(lo, hi, intermods, midIndex + 1, end);
+//        }
+//    }
+
     // Function to analyse new intermods
-    List<Conflict> analyse(int newChannelIndex,
+    static List<Conflict> analyseBackup(int newChannelIndex,
                            List<Channel> channels,
                            List<Intermod> intermodList,
                            List<Intermod> allIntermods) {
@@ -157,7 +230,7 @@ class Analyser {
     }
 
     // Compare channel to intermod and create conflict if necessary
-    private void analyseIM(final Channel channel, final Intermod currentIntermod, List<Conflict> newConflicts) {
+    private static void analyseIM(final Channel channel, final Intermod currentIntermod, List<Conflict> newConflicts) {
         int spacing = Math.abs(channel.getFreq() - currentIntermod.getFreq());
 
         // If current intermodulation not created by current frequency, check spacing
@@ -189,5 +262,28 @@ class Analyser {
                 newConflicts.add(new Conflict(channel, currentIntermod));
             }
         }
+    }
+
+    // Remove all conflicts contributed by a specific channel
+    static void removeConflicts(Channel channel, List<Conflict> conflicts) {
+        conflicts.removeIf(conflict -> {
+            if (conflict.getChannel() == channel
+                    || conflict.getConflictChannel() == channel
+                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF1() == channel)
+                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF2() == channel)
+                    || (conflict.getConflictIntermod() != null && conflict.getConflictIntermod().getF3() == channel)) {
+                conflict.getChannel().removeConflict(conflict);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    static List<Conflict> analyse(int newChannelIndex,
+                                  List<Channel> channels,
+                                  List<Intermod> intermodList,
+                                  List<Intermod> allIntermods) {
+        ArrayList<Conflict> newConflicts = new ArrayList<>();
+        return newConflicts;
     }
 }
