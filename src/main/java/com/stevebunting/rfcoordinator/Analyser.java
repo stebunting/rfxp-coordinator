@@ -1,5 +1,6 @@
 package com.stevebunting.rfcoordinator;
 
+import com.sun.istack.internal.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +31,15 @@ public class Analyser {
      * @return sorted list of intermodulations generated between newChannel and
      * all other channels in channels list
      */
-    static List<Intermod> calculateIntermods(final List<Channel> channels, final Channel newChannel, final Analyser.Calculate calculate) {
+    static List<Intermod> calculateIntermods(
+        @NotNull final List<Channel> channels,
+        @NotNull final Channel newChannel,
+        @NotNull final Analyser.Calculate calculate
+    ) throws IllegalArgumentException {
+        if (channels == null || newChannel == null || calculate == null) {
+            throw new IllegalArgumentException();
+        }
+
         final ArrayList<Intermod> newIntermods = new ArrayList<>();
         final int numChannels = channels.size();
 
@@ -77,7 +86,13 @@ public class Analyser {
      * @param mainList list of intermods to merge into
      * @param newList list of intermods to insert
      */
-    static void mergeIntermods(final List<Intermod> mainList, final List<Intermod> newList) {
+    static void mergeIntermods(
+        @NotNull final List<Intermod> mainList,
+        @NotNull final List<Intermod> newList
+    ) throws IllegalArgumentException {
+        if (mainList == null || newList == null) {
+            throw new IllegalArgumentException();
+        }
         mainList.addAll(newList);
         Collections.sort(mainList);
     }
@@ -89,10 +104,40 @@ public class Analyser {
      * @param channel channel object to test intermodulation list against
      * @param intermods a list of intermodulations to be operated on
      */
-    static void removeIntermods(final Channel channel, List<Intermod> intermods) {
+    static void removeIntermods(
+        final Channel channel,
+        @NotNull List<Intermod> intermods
+    ) throws IllegalArgumentException {
+        if (intermods == null) {
+            throw new IllegalArgumentException();
+        }
         intermods.removeIf(intermod -> intermod.getF1() == channel
-                || intermod.getF2() == channel
-                || intermod.getF3() == channel);
+                                    || intermod.getF2() == channel
+                                    || intermod.getF3() == channel);
+    }
+
+    /**
+     * Method to calculate channel conflicts between 2 channels and add them
+     * to a list of conflicts.
+     *
+     * @param conflicts list of conflicts to add to
+     * @param channel1 first channel to test
+     * @param channel2 second channel to test
+     */
+    static void analyseTwoChannels(final List<Conflict> conflicts, final Channel channel1, final Channel channel2) {
+        if (channel1 == null || channel2 == null) {
+            return;
+        }
+
+        int difference = Math.abs(channel1.getFreq() - channel2.getFreq());
+        if (channel1 != channel2) {
+            if (difference < channel1.getEquipment().getChannelSpacing()) {
+                conflicts.add(new Conflict(channel1, channel2));
+            }
+            if (difference < channel2.getEquipment().getChannelSpacing()) {
+                conflicts.add(new Conflict(channel2, channel1));
+            }
+        }
     }
 
     // Function to test one channel against an array (channel must be in array)
@@ -102,17 +147,7 @@ public class Analyser {
         Channel channelUnderTest = channels.get(newChannelIndex);
 
         for (Channel channel : channels) {
-            int difference = Math.abs(channel.getFreq() - channelUnderTest.getFreq());
-            int channelSpacing = channel.getEquipment().getChannelSpacing();
-            int newChannelSpacing = channelUnderTest.getEquipment().getChannelSpacing();
-            if (channel != channelUnderTest) {
-                if (difference < channelSpacing) {
-                    newConflicts.add(new Conflict(channel, channelUnderTest));
-                }
-                if (difference < newChannelSpacing) {
-                    newConflicts.add(new Conflict(channelUnderTest, channel));
-                }
-            }
+            Analyser.analyseTwoChannels(newConflicts, channel, channelUnderTest);
         }
         return newConflicts;
     }

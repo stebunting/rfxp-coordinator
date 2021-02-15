@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 @DisplayName("Analyser...")
 class AnalyserTests {
@@ -42,6 +43,48 @@ class AnalyserTests {
             channelList = new ArrayList<>();
         }
 
+        @DisplayName("throw when calculating with null channel list passed")
+        @Test
+        final void testCalculateIntermodsThrowsOnNullList() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Analyser.calculateIntermods(null, channel1, calculations));
+        }
+
+        @DisplayName("throw when calculating with null channel passed")
+        @Test
+        final void testCalculateIntermodsThrowsOnNullChannel() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Analyser.calculateIntermods(channelList, null, calculations));
+        }
+
+        @DisplayName("throw when calculating with null calculate object passed")
+        @Test
+        final void testCalculateIntermodsThrowsOnNullCalculate() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Analyser.calculateIntermods(new ArrayList<Channel>(), channel1, null));
+        }
+
+        @DisplayName("throw when merging with null main channel list passed")
+        @Test
+        final void testMergeIntermodsThrowsOnNullMainList() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Analyser.mergeIntermods(null, new ArrayList<>()));
+        }
+
+        @DisplayName("throw when merging with null new channel list passed")
+        @Test
+        final void testMergeIntermodsThrowsOnNullNewList() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Analyser.mergeIntermods(new ArrayList<>(), null));
+        }
+
+        @DisplayName("throw when removing intermods with null list passed")
+        @Test
+        final void testRemoveIntermodsThrowsOnNullList() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Analyser.removeIntermods(channel1, null));
+        }
+
         @DisplayName("calculate intermods correctly for two channels")
         @Test
         final void testGenerateIntermodsTwoChannels() {
@@ -74,7 +117,7 @@ class AnalyserTests {
 
         @DisplayName("calculate intermods correctly for three channels")
         @Test
-        final void testGenerateIntermodsThreeChannels() {
+        final void testGenerateIntermodsThreeChannels() throws IllegalArgumentException {
             channelList.add(channel1);
             channelList.add(channel2);
 
@@ -130,7 +173,7 @@ class AnalyserTests {
 
         @DisplayName("calculate intermods correctly for three channels")
         @Test
-        final void testCorrectNumberOfIntermods() throws InvalidFrequencyException {
+        final void testCorrectNumberOfIntermods() throws IllegalArgumentException, InvalidFrequencyException {
             channelList.add(channel1);
             List<Intermod> intermods = new ArrayList<>();
 
@@ -150,7 +193,7 @@ class AnalyserTests {
 
         @DisplayName("return sorted list of intermods")
         @Test
-        final void testSorting() {
+        final void testSorting() throws IllegalArgumentException {
             channelList.add(channel1);
             channelList.add(channel2);
             List<Intermod> intermods = Analyser.calculateIntermods(channelList, channel2, calculations);
@@ -164,9 +207,9 @@ class AnalyserTests {
             assertTrue(TestHelpers.isSorted(intermods));
         }
 
-        @DisplayName("removes all intermods associated with a channel")
+        @DisplayName("remove all intermods associated with a channel")
         @Test
-        final void testRemoveIntermods() {
+        final void testRemoveIntermods() throws InvalidFrequencyException {
             channelList.add(channel1);
             channelList.add(channel2);
             List<Intermod> intermods = Analyser.calculateIntermods(channelList, channel2, calculations);
@@ -181,7 +224,7 @@ class AnalyserTests {
             assertEquals(27, intermods.size());
         }
 
-        @DisplayName("removes all intermods from large list")
+        @DisplayName("remove required intermods from large list")
         @Test
         final void testRemoveIntermodsFromLargeList() throws InvalidFrequencyException {
             channelList.add(channel1);
@@ -209,12 +252,51 @@ class AnalyserTests {
                     intermods.size());
             }
         }
+
+        @DisplayName("add and remove intermods with no artifacts")
+        @Test
+        final void testAddAndRemoveIntermodsWithNoArtifacts() throws InvalidFrequencyException {
+            int NUM_TESTS = 50;
+            Random rand = new Random();
+            ArrayList<Intermod> intermods = new ArrayList<>();
+
+            for (int i = 0; i < NUM_TESTS; i++) {
+                if (i % 3 == 2 && channelList.size() > 0) {
+                    Collections.shuffle(channelList);
+                    Channel channel = channelList.remove(0);
+                    Analyser.removeIntermods(channel, intermods);
+                } else {
+                    Channel channel = new Channel(null, (rand.nextInt() % 500) + 400, equipment);
+                    channelList.add(channel);
+                    List<Intermod> newIM = Analyser.calculateIntermods(channelList, channel, calculations);
+                    Analyser.mergeIntermods(intermods, newIM);
+                }
+                assertEquals(
+                        TestHelpers.expectedIntermods(channelList.size(), calculations),
+                        intermods.size());
+            }
+
+            ArrayList<Intermod> newIntermods = new ArrayList<>();
+            int numChannels = channelList.size();
+            for (int i = 0; i < numChannels; i++) {
+                Channel channel = channelList.remove(0);
+                Analyser.mergeIntermods(
+                        newIntermods,
+                        Analyser.calculateIntermods(channelList, channel, calculations));
+            }
+
+            assertEquals(0, channelList.size());
+            assertEquals(newIntermods.size(), intermods.size());
+            for (int i = 0; i < newIntermods.size(); i++) {
+                assertEquals(newIntermods.get(i).getFreq(), intermods.get(i).getFreq());
+                assertEquals(newIntermods.get(i).getType(), intermods.get(i).getType());
+            }
+        }
     }
 
     @DisplayName("channel conflict calculation methods...")
     @Nested
     class AnalyserChannelConflictTests {
-
         Channel channel1;
         Channel channel2;
         ArrayList<Channel> channelList;
