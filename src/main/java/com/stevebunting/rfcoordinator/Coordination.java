@@ -32,7 +32,7 @@ public class Coordination {
         int index = addChannelInPlace(newChannel);
 
         List<Intermod> intermodList = Analyser.calculateIntermods(channels, newChannel, calculations);
-        mergeConflicts(Analyser.analyse(index, channels, intermodList, intermods));
+//        mergeConflicts(Analyser.analyse(index, channels, intermodList, intermods));
         mergeIntermods(intermodList);
 
         idCounter++;
@@ -101,7 +101,7 @@ public class Coordination {
         Channel removedChannel = channels.remove(index);
 
         Analyser.removeIntermods(removedChannel, intermods);
-        Analyser.removeConflicts(removedChannel, conflicts);
+//        Analyser.removeConflicts(removedChannel, conflicts);
 
         return removedChannel;
     }
