@@ -22,7 +22,7 @@ public class Analyser {
      * coordination. If an intermodulation is not required, it should not be
      * calculated to optimise performance.
      */
-    static class Calculate {
+    final static class AnalyserCalculations {
         boolean im2t3o = true;
         boolean im2t5o = true;
         boolean im2t7o = true;
@@ -30,27 +30,65 @@ public class Analyser {
         boolean im3t3o = true;
     }
 
+    // ArrayList to hold list of channels with id key
+    private final List<Channel> channels = new ArrayList<>();
+
+    // ArrayList to hold list of all intermodulations
+    private List<Intermod> intermods = new ArrayList<>();
+
+    // ArrayList to hold list of all conflicts
+    private final List<Conflict> conflicts = new ArrayList<>();
+
+    // Intermodulation Calculations to make
+    private final AnalyserCalculations calculations = new AnalyserCalculations();
+
+    // Add a new channel and analyse
+    final void addChannel(Channel channel) throws IllegalArgumentException {
+        if (channel == null) {
+            throw new IllegalArgumentException();
+        }
+
+        // Insert channel in list in order
+        int index = 0;
+        for (; index < channels.size(); index++) {
+            if (channels.get(index).getFreq() > channel.getFreq()) {
+                break;
+            }
+        }
+        channels.add(index, channel);
+
+        // Calculate new intermods
+        List<Intermod> newIntermods = calculateIntermods(channel);
+
+        // Generate intermod conflicts and merge intermods into list
+        conflicts.addAll(analyseIMSpacing(channel, intermods));
+        conflicts.addAll(analyseIMSpacing(channels, newIntermods));
+        intermods = mergeLists(intermods, newIntermods);
+
+        // Generate channel conflicts
+        conflicts.addAll(analyseChannelSpacing(channel));
+    }
+
+    final void removeChannel(Channel channel) {
+        if (channel == null) {
+            throw new IllegalArgumentException();
+        }
+
+        channels.remove(channel);
+        removeIntermods(channel);
+        removeConflicts(channel);
+    }
+
     /**
      * Function to calculate all intermodulations between a single channel
      * and a list of channels. The new channel may be included in the list
      * of channels.
      *
-     * @param channels   a list of channels to compare new channel against
      * @param newChannel channel to generate intermods against
-     * @param calculate  object to specify which intermodulations will be
-     *                   calculated
      * @return sorted list of intermodulations generated between newChannel and
      * all other channels in channels list
      */
-    static List<Intermod> calculateIntermods(
-            @NotNull final List<Channel> channels,
-            @NotNull final Channel newChannel,
-            @NotNull final Analyser.Calculate calculate
-    ) throws IllegalArgumentException {
-        if (channels == null || newChannel == null || calculate == null) {
-            throw new IllegalArgumentException();
-        }
-
+    private List<Intermod> calculateIntermods(@NotNull final Channel newChannel) {
         final ArrayList<Intermod> newIntermods = new ArrayList<>();
         final int numChannels = channels.size();
 
@@ -58,23 +96,23 @@ public class Analyser {
             Channel channel2 = channels.get(i);
 
             if (newChannel != channel2) {
-                if (calculate.im2t3o) {
+                if (calculations.im2t3o) {
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, newChannel, channel2, null));
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T3O, channel2, newChannel, null));
                 }
-                if (calculate.im2t5o) {
+                if (calculations.im2t5o) {
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, newChannel, channel2, null));
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T5O, channel2, newChannel, null));
                 }
-                if (calculate.im2t7o) {
+                if (calculations.im2t7o) {
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, newChannel, channel2, null));
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T7O, channel2, newChannel, null));
                 }
-                if (calculate.im2t9o) {
+                if (calculations.im2t9o) {
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, newChannel, channel2, null));
                     newIntermods.add(new Intermod(Intermod.Type.IM_2T9O, channel2, newChannel, null));
                 }
-                if (calculate.im3t3o) {
+                if (calculations.im3t3o) {
                     for (int j = i + 1; j < numChannels; j++) {
                         Channel channel3 = channels.get(j);
 
@@ -97,14 +135,10 @@ public class Analyser {
      * @param a first list
      * @param b second list
      */
-    static <T extends Comparable<T>> List<T> mergeLists(
+    private <T extends Comparable<T>> List<T> mergeLists(
             @NotNull final List<T> a,
             @NotNull final List<T> b
-    ) throws IllegalArgumentException {
-        if (a == null || b == null) {
-            throw new IllegalArgumentException();
-        }
-
+    ) {
         List<T> mergedList = new ArrayList<>();
         int indexA = 0;
         int indexB = 0;
@@ -131,37 +165,47 @@ public class Analyser {
      * by a specific channel.
      *
      * @param channel   channel object to test intermodulation list against
-     * @param intermods a list of intermodulations to be operated on
      */
-    static void removeIntermods(
-            final Channel channel,
-            @NotNull List<Intermod> intermods
-    ) throws IllegalArgumentException {
-        if (intermods == null) {
-            throw new IllegalArgumentException();
-        }
-        intermods.removeIf(intermod -> intermod.getF1() == channel
-                || intermod.getF2() == channel
-                || intermod.getF3() == channel);
+    private void removeIntermods(final Channel channel) {
+        intermods.removeIf((Intermod intermod) ->
+                intermod.getF1() == channel
+             || intermod.getF2() == channel
+             || intermod.getF3() == channel);
+    }
+
+    /**
+     * Method to remove all conflicts from a list that are contributed
+     * by a specific channel.
+     *
+     * @param channel   channel object to test conflict list against
+     */
+    private void removeConflicts(final Channel channel) {
+        conflicts.removeIf((Conflict conflict) -> {
+            switch (conflict.getType()) {
+                case CHANNEL_SPACING:
+                    return conflict.getChannel() == channel || conflict.getConflictChannel() == channel;
+                case INTERMOD_SPACING:
+                    return conflict.getChannel() == channel
+                        || conflict.getConflictIntermod().getF1() == channel
+                        || conflict.getConflictIntermod().getF2() == channel
+                        || conflict.getConflictIntermod().getF3() == channel;
+                default:
+                    return false;
+            }
+        });
     }
 
     /**
      * Method to calculate channel conflicts between 2 channels and add them
-     * to a list of conflicts.
+     * to list of conflicts.
      *
-     * @param conflicts list of conflicts to add to
      * @param channel1  first channel to test
      * @param channel2  second channel to test
      */
-    static void getConflictsTwoChannels(
-            @NotNull final List<Conflict> conflicts,
-            @NotNull final Channel channel1,
-            @NotNull final Channel channel2
-    ) throws IllegalArgumentException {
-        if (conflicts == null || channel1 == null || channel2 == null) {
-            throw new IllegalArgumentException();
-        }
-
+    private void getConflictsTwoChannels(
+        @NotNull final Channel channel1,
+        @NotNull final Channel channel2
+    ) {
         int difference = Math.abs(channel1.getFreq() - channel2.getFreq());
         if (channel1 != channel2) {
             if (difference < channel1.getEquipment().getChannelSpacing()) {
@@ -177,21 +221,13 @@ public class Analyser {
      * Method to test one channel against a list of channels. The channel may
      * be in the list.
      *
-     * @param channels   list of channels to compare against
      * @param newChannel channel to compare
      * @return list of conflicts
      */
-    static List<Conflict> analyseChannelSpacing(
-            @NotNull final List<Channel> channels,
-            @NotNull final Channel newChannel
-    ) throws IllegalArgumentException {
-        if (channels == null || newChannel == null) {
-            throw new IllegalArgumentException();
-        }
-
+    private List<Conflict> analyseChannelSpacing(@NotNull final Channel newChannel) {
         ArrayList<Conflict> conflicts = new ArrayList<>();
         for (Channel channel : channels) {
-            Analyser.getConflictsTwoChannels(conflicts, channel, newChannel);
+            getConflictsTwoChannels(channel, newChannel);
         }
         return conflicts;
     }
@@ -203,14 +239,10 @@ public class Analyser {
      * @param channel channel to test
      * @param intermod intermod to test against
      */
-    static Conflict getConflictsChannelAndIM(
+    private Conflict getConflictsChannelAndIM(
         @NotNull final Channel channel,
         @NotNull final Intermod intermod
-    ) throws IllegalArgumentException {
-        if (channel == null || intermod == null) {
-            throw new IllegalArgumentException();
-        }
-
+    ) {
         if (intermod.getF1() == channel || intermod.getF2() == channel || intermod.getF3() == channel) {
             return null;
         }
@@ -280,7 +312,7 @@ public class Analyser {
      * @param intermods list of intermods to search in
      * @return found index
      */
-    static int getNextImIndex(int limitLo, List<Intermod> intermods) {
+    private int getNextImIndex(int limitLo, List<Intermod> intermods) {
         return getNextImIndex(limitLo, intermods, 0, intermods.size() - 1);
     }
 
@@ -292,29 +324,26 @@ public class Analyser {
      * @param intermods list of intermodulations to test
      * @return list of conflicts generated
      */
-    static List<Conflict> analyseIMSpacing(
+    private List<Conflict> analyseIMSpacing(
         @NotNull final List<Channel> channels,
         @NotNull final List<Intermod> intermods
     ) {
-        // TODO: Test return if channel list empty or null
         List<Conflict> conflicts = new ArrayList<>();
         if (channels.size() == 0 || intermods.size() == 0) {
             return conflicts;
         }
 
         // Loop over channels
-        for (int i = 0; i < channels.size(); i++) {
-            // Channel to test
-            Channel channel = channels.get(i);
+        for (Channel channel : channels) {
             int rangeLo = channel.getFreq() - channel.getEquipment().getMaxImSpacing();
             int rangeHi = channel.getFreq() + channel.getEquipment().getMaxImSpacing();
 
             // Starting index in intermod list
-            int imIndex = Analyser.getNextImIndex(rangeLo, intermods);
+            int imIndex = getNextImIndex(rangeLo, intermods);
 
             // Loop over intermods until out of upper danger range of channel
             while (imIndex < intermods.size() && intermods.get(imIndex).getFreq() < rangeHi) {
-                Conflict newConflict = Analyser.getConflictsChannelAndIM(channel, intermods.get(imIndex));
+                Conflict newConflict = getConflictsChannelAndIM(channel, intermods.get(imIndex));
                 if (newConflict != null) {
                     conflicts.add(newConflict);
                 }
@@ -325,20 +354,32 @@ public class Analyser {
     }
 
     /**
-     * Method to find all channel/intermod conflicts given a single channel
-     * and a list of intermods.
+     * Method to find all intermod conflicts with a new channel and an existing
+     * list of intermods.
      *
-     * @param channel channel to test
-     * @param intermods list of intermodulations to test
+     * @param newChannel channel to test
      * @return list of conflicts generated
      */
-    static List<Conflict> analyseIMSpacing(
-            @NotNull final Channel channel,
-            @NotNull final List<Intermod> intermods
+    private List<Conflict> analyseIMSpacing(
+        @NotNull final Channel newChannel,
+        @NotNull final List<Intermod> intermods
     ) {
-        return Analyser.analyseIMSpacing(
-            new ArrayList<>(Collections.singletonList(channel)),
-            intermods
-        );
+        return analyseIMSpacing(new ArrayList<>(Collections.singletonList(newChannel)), intermods);
+    }
+
+    final public List<Channel> getChannelList() {
+        return channels;
+    }
+
+    final public List<Intermod> getIntermodList() {
+        return intermods;
+    }
+
+    final public List<Conflict> getConflictList() {
+        return conflicts;
+    }
+
+    final public AnalyserCalculations getCalculations() {
+        return calculations;
     }
 }

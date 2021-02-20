@@ -19,7 +19,7 @@ public class Coordination {
     private final ArrayList<Conflict> conflicts = new ArrayList<>();
 
     // Intermodulation Calculations to make
-    private final Analyser.Calculate calculations = new Analyser.Calculate();
+//    private final Analyser.Calculate calculations = new Analyser.Calculate();
 
     // Add new channel to coordination
     public final int addChannel(double frequency, Equipment equipment) throws InvalidFrequencyException {
@@ -31,9 +31,9 @@ public class Coordination {
         Channel newChannel = new Channel(id, frequency, equipment);
         int index = addChannelInPlace(newChannel);
 
-        List<Intermod> intermodList = Analyser.calculateIntermods(channels, newChannel, calculations);
+//        List<Intermod> intermodList = Analyser.calculateIntermods(channels, newChannel, calculations);
 //        mergeConflicts(Analyser.analyse(index, channels, intermodList, intermods));
-        mergeIntermods(intermodList);
+//        mergeIntermods(intermodList);
 
         idCounter++;
         return id;
@@ -51,11 +51,11 @@ public class Coordination {
         channelToUpdate.setFreq(frequency);
 
         // Remove channel and intermodulation products
-        Analyser.removeIntermods(channels.remove(index), intermods);
+//        Analyser.removeIntermods(channels.remove(index), intermods);
 
         // Insert Channel in new position
         addChannelInPlace(channelToUpdate);
-        Analyser.calculateIntermods(channels, channelToUpdate, calculations);
+//        Analyser.calculateIntermods(channels, channelToUpdate, calculations);
 
         return channelToUpdate;
     }
@@ -100,7 +100,7 @@ public class Coordination {
         }
         Channel removedChannel = channels.remove(index);
 
-        Analyser.removeIntermods(removedChannel, intermods);
+//        Analyser.removeIntermods(removedChannel, intermods);
 //        Analyser.removeConflicts(removedChannel, conflicts);
 
         return removedChannel;
@@ -170,44 +170,44 @@ public class Coordination {
         }
         return count;
     }
-
-    public boolean getCalculate2t3o() {
-        return calculations.im2t3o;
-    }
-
-    public void setCalculate2t3o(final boolean calculate2t3o) {
-        this.calculations.im2t3o = calculate2t3o;
-    }
-
-    public boolean getCalculate2t5o() {
-        return calculations.im2t5o;
-    }
-
-    public void setCalculate2t5o(final boolean calculate2t5o) {
-        this.calculations.im2t5o = calculate2t5o;
-    }
-
-    public boolean getCalculate2t7o() {
-        return calculations.im2t7o;
-    }
-
-    public void setCalculate2t7o(final boolean calculate2t7o) {
-        this.calculations.im2t7o = calculate2t7o;
-    }
-
-    public boolean getCalculate2t9o() {
-        return calculations.im2t9o;
-    }
-
-    public void setCalculate2t9o(final boolean calculate2t9o) {
-        this.calculations.im2t9o = calculate2t9o;
-    }
-
-    public boolean getCalculate3t3o() {
-        return calculations.im3t3o;
-    }
-
-    public void setCalculate3t3o(final boolean calculate3t3o) {
-        this.calculations.im3t3o = calculate3t3o;
-    }
+//
+//    public boolean getCalculate2t3o() {
+//        return calculations.im2t3o;
+//    }
+//
+//    public void setCalculate2t3o(final boolean calculate2t3o) {
+//        this.calculations.im2t3o = calculate2t3o;
+//    }
+//
+//    public boolean getCalculate2t5o() {
+//        return calculations.im2t5o;
+//    }
+//
+//    public void setCalculate2t5o(final boolean calculate2t5o) {
+//        this.calculations.im2t5o = calculate2t5o;
+//    }
+//
+//    public boolean getCalculate2t7o() {
+//        return calculations.im2t7o;
+//    }
+//
+//    public void setCalculate2t7o(final boolean calculate2t7o) {
+//        this.calculations.im2t7o = calculate2t7o;
+//    }
+//
+//    public boolean getCalculate2t9o() {
+//        return calculations.im2t9o;
+//    }
+//
+//    public void setCalculate2t9o(final boolean calculate2t9o) {
+//        this.calculations.im2t9o = calculate2t9o;
+//    }
+//
+//    public boolean getCalculate3t3o() {
+//        return calculations.im3t3o;
+//    }
+//
+//    public void setCalculate3t3o(final boolean calculate3t3o) {
+//        this.calculations.im3t3o = calculate3t3o;
+//    }
 }
