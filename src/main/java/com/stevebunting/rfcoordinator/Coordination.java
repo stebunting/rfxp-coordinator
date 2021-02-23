@@ -1,95 +1,72 @@
 package com.stevebunting.rfcoordinator;
 
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public class Coordination {
+final public class Coordination {
 
     // Counter to assign id's to channels
     private int idCounter = 0;
 
     // ArrayList to hold list of channels with id key
-    private final ArrayList<Channel> channels = new ArrayList<>();
+    final private ArrayList<Channel> channels = new ArrayList<>();
 
-    // ArrayList to hold list of all intermodulations
-    private final ArrayList<Intermod> intermods = new ArrayList<>();
-
-    // ArrayList to hold list of all conflicts
-    private final ArrayList<Conflict> conflicts = new ArrayList<>();
-
-    // Intermodulation Calculations to make
-//    private final Analyser.Calculate calculations = new Analyser.Calculate();
+    // Analyser class
+    final private Analyser analyser = new Analyser();
 
     // Add new channel to coordination
-    public final int addChannel(double frequency, Equipment equipment) throws InvalidFrequencyException {
+    final int addChannel(
+            final double frequency,
+            @NotNull final Equipment equipment
+    ) throws InvalidFrequencyException {
         if (equipment == null) {
             throw new IllegalArgumentException("A valid equipment profile must be supplied");
         }
         final int id = idCounter;
 
         Channel newChannel = new Channel(id, frequency, equipment);
-        int index = addChannelInPlace(newChannel);
-
-//        List<Intermod> intermodList = Analyser.calculateIntermods(channels, newChannel, calculations);
-//        mergeConflicts(Analyser.analyse(index, channels, intermodList, intermods));
-//        mergeIntermods(intermodList);
+        channels.add(newChannel);
+        analyser.addChannel(newChannel);
 
         idCounter++;
         return id;
     }
 
     // Update a channels frequency
-    public Channel updateChannel(int id, double frequency) throws InvalidFrequencyException {
-        final int index = getChannelIndex(id);
-        if (index == -1) {
+    final Channel updateChannel(final int id, final double frequency) throws InvalidFrequencyException {
+        final Channel channelToUpdate = getChannelById(id);
+        if (channelToUpdate == null) {
             return null;
         }
-        Channel channelToUpdate = channels.get(index);
-
-        // Update channel, throws if invalid
         channelToUpdate.setFreq(frequency);
-
-        // Remove channel and intermodulation products
-//        Analyser.removeIntermods(channels.remove(index), intermods);
-
-        // Insert Channel in new position
-        addChannelInPlace(channelToUpdate);
-//        Analyser.calculateIntermods(channels, channelToUpdate, calculations);
+        analyser.updateChannel(channelToUpdate);
 
         return channelToUpdate;
     }
 
     // Update a channels name
-    public Channel updateChannel(int id, String name) {
+    final Channel updateChannel(final int id, @NotNull final String name) {
         Channel channelToUpdate = getChannelById(id);
-        if (channelToUpdate != null) {
-            channelToUpdate.setName(name);
+        if (channelToUpdate == null) {
+            return null;
         }
+        channelToUpdate.setName(name);
         return channelToUpdate;
     }
 
     // Update a channels equipment
-    public Channel updateChannel(int id, Equipment equipment) throws InvalidFrequencyException {
+    final Channel updateChannel(
+            final int id,
+            @NotNull final Equipment equipment
+    ) throws InvalidFrequencyException {
         Channel channelToUpdate = getChannelById(id);
-        if (channelToUpdate != null) {
-            channelToUpdate.setEquipment(equipment);
+        if (channelToUpdate == null) {
+            return null;
         }
+        channelToUpdate.setEquipment(equipment);
+        analyser.updateChannel(channelToUpdate);
+
         return channelToUpdate;
-    }
-
-    // Method to add a channel in place
-    private int addChannelInPlace(Channel channel) {
-        int index;
-        for (index = 0; index < channels.size(); index++) {
-            if (channels.get(index).getFreq() > channel.getFreq()) {
-                break;
-            }
-        }
-        channels.add(index, channel);
-        assert Helpers.isSorted(channels);
-
-        return index;
     }
 
     // Remove channel from coordination, returns null if id is not found
@@ -99,25 +76,9 @@ public class Coordination {
             return null;
         }
         Channel removedChannel = channels.remove(index);
-
-//        Analyser.removeIntermods(removedChannel, intermods);
-//        Analyser.removeConflicts(removedChannel, conflicts);
+        analyser.removeChannel(removedChannel);
 
         return removedChannel;
-    }
-
-    // Merge list of intermods into main list
-    private void mergeIntermods(final List<Intermod> newIntermods) {
-        intermods.addAll(newIntermods);
-        Collections.sort(intermods);
-    }
-
-    // Merge list of conflicts into main list
-    private void mergeConflicts(final List<Conflict> newConflicts) {
-        for (Conflict conflict : newConflicts) {
-            conflicts.add(conflict);
-            conflict.getChannel().addConflict(conflict);
-        }
     }
 
     // Get channel index from id, returns -1 if not found
@@ -152,62 +113,66 @@ public class Coordination {
 
     // Get number of intermods
     public int getNumIntermods() {
-        return intermods.size();
+        return analyser.getIntermodList().size();
     }
 
     // Get number of conflicts
     public int getNumConflicts() {
-        return conflicts.size();
+        return analyser.getConflictList().size();
     }
 
     // Get number of conflicts by type
     public int getNumConflictsOfType(Conflict.Type type) {
         int count = 0;
-        for(Conflict conflict : conflicts) {
+        for(Conflict conflict : analyser.getConflictList()) {
             if (conflict.getType() == type) {
                 count++;
             }
         }
         return count;
     }
-//
-//    public boolean getCalculate2t3o() {
-//        return calculations.im2t3o;
-//    }
-//
-//    public void setCalculate2t3o(final boolean calculate2t3o) {
-//        this.calculations.im2t3o = calculate2t3o;
-//    }
-//
-//    public boolean getCalculate2t5o() {
-//        return calculations.im2t5o;
-//    }
-//
-//    public void setCalculate2t5o(final boolean calculate2t5o) {
-//        this.calculations.im2t5o = calculate2t5o;
-//    }
-//
-//    public boolean getCalculate2t7o() {
-//        return calculations.im2t7o;
-//    }
-//
-//    public void setCalculate2t7o(final boolean calculate2t7o) {
-//        this.calculations.im2t7o = calculate2t7o;
-//    }
-//
-//    public boolean getCalculate2t9o() {
-//        return calculations.im2t9o;
-//    }
-//
-//    public void setCalculate2t9o(final boolean calculate2t9o) {
-//        this.calculations.im2t9o = calculate2t9o;
-//    }
-//
-//    public boolean getCalculate3t3o() {
-//        return calculations.im3t3o;
-//    }
-//
-//    public void setCalculate3t3o(final boolean calculate3t3o) {
-//        this.calculations.im3t3o = calculate3t3o;
-//    }
+
+    final boolean getCalculate2t3o() {
+        return analyser.getCalculations().getIM2t3o();
+    }
+
+    final void setCalculate2t3o(final boolean calculate2t3o) {
+        analyser.getCalculations().setIM2t3o(calculate2t3o);
+    }
+
+    final boolean getCalculate2t5o() {
+        return analyser.getCalculations().getIM2t5o();
+    }
+
+    final void setCalculate2t5o(final boolean calculate2t5o) {
+        analyser.getCalculations().setIM2t5o(calculate2t5o);
+    }
+
+    final boolean getCalculate2t7o() {
+        return analyser.getCalculations().getIM2t7o();
+    }
+
+    final void setCalculate2t7o(final boolean calculate2t7o) {
+        analyser.getCalculations().setIM2t7o(calculate2t7o);
+    }
+
+    final boolean getCalculate2t9o() {
+        return analyser.getCalculations().getIM2t9o();
+    }
+
+    final void setCalculate2t9o(final boolean calculate2t9o) {
+        analyser.getCalculations().setIM2t9o(calculate2t9o);
+    }
+
+    final boolean getCalculate3t3o() {
+        return analyser.getCalculations().getIM3t3o();
+    }
+
+    final void setCalculate3t3o(final boolean calculate3t3o) {
+        analyser.getCalculations().setIM3t3o(calculate3t3o);
+    }
+
+    final Analyser getAnalyser() {
+        return analyser;
+    }
 }

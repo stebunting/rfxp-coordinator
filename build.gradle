@@ -10,12 +10,15 @@ repositories {
 }
 
 dependencies {
+    def annotationsVersion = "20.1.0"
+    compile "org.jetbrains:annotations:${annotationsVersion}"
+
     // JUnit test framework
-    def junitVersion = "5.7.0"
+    def junitVersion = "5.7.1"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
 
     // Mockito
-    def mockitoVersion = "3.7.9"
+    def mockitoVersion = "3.7.18"
     testCompile "org.mockito:mockito-core:${mockitoVersion}"
 
     // Jackson JSON Parsing

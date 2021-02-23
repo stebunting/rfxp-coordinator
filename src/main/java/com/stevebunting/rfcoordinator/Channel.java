@@ -1,7 +1,6 @@
 package com.stevebunting.rfcoordinator;
 
-import com.sun.istack.internal.NotNull;
-
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
