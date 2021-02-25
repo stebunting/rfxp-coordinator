@@ -38,12 +38,12 @@ final class Analyser {
         List<Intermod> newIntermods = calculateIntermods(channel);
 
         // Generate intermod conflicts and merge intermods into list
-        getIMConflicts(channel, intermods);
-        getIMConflicts(channels, newIntermods);
+        getIMConflicts(channel, intermods, conflicts, true);
+        getIMConflicts(channels, newIntermods, conflicts, true);
         intermods = mergeLists(intermods, newIntermods);
 
         // Generate channel conflicts
-        getChannelConflicts(channel);
+        getChannelConflicts(channel, conflicts, true, true);
     }
 
     /**
@@ -84,6 +84,31 @@ final class Analyser {
             addChannel(channel);
         }
         return channelRemoved;
+    }
+
+    /**
+     * Method to generate artifacts from a new channel but does not merge them
+     * into the state.
+     *
+     * @param channel channel to test
+     * @return number of conflicts generated
+     * @throws IllegalArgumentException on null channel
+     */
+    final int checkArtifacts(@NotNull final Channel channel) throws IllegalArgumentException {
+        if (channel == null) {
+            throw new IllegalArgumentException();
+        }
+
+        // Calculate new intermods
+        List<Intermod> newIntermods = calculateIntermods(channel);
+
+        // Generate conflicts and add to a local list
+        List<Conflict> newConflicts = new ArrayList<>();
+        getIMConflicts(channel, intermods, newConflicts, true);
+        getIMConflicts(channels, newIntermods, newConflicts, false);
+        getChannelConflicts(channel, newConflicts, true, false);
+
+        return newConflicts.size();
     }
 
     /**
@@ -168,33 +193,44 @@ final class Analyser {
     }
 
     /**
-     * Method to find all channel/intermod conflicts given a list of channels
-     * and a list of intermods.
+     * Method to find all channel/intermod conflicts from a list of channels
+     * and a list of intermods and add them to a list of conflicts. Adds
+     * conflicts to conflicts list and to relevant channel if flag is set.
      *
      * @param channels list of channels to test
      * @param intermods list of intermodulations to test
+     * @param conflicts list to add generated conflicts to
+     * @param addConflictToChannel add conflict reference to channel if true
      */
     private void getIMConflicts(
             @NotNull final List<Channel> channels,
-            @NotNull final List<Intermod> intermods
+            @NotNull final List<Intermod> intermods,
+            @NotNull final List<Conflict> conflicts,
+            final boolean addConflictToChannel
     ) {
         if (channels.size() == 0 || intermods.size() == 0) {
             return;
         }
         for (Channel channel : channels) {
-            getIMConflicts(channel, intermods);
+            getIMConflicts(channel, intermods, conflicts, addConflictToChannel);
         }
     }
 
     /**
      * Method to find all intermod conflicts with a new channel and an existing
-     * list of intermods.
+     * list of intermods and add them to a list of conflicts. Adds conflicts to
+     * conflicts list and to relevant channel if flag is set.
      *
      * @param channel channel to test
+     * @param intermods list of intermodulations to test
+     * @param conflicts list to add generated conflicts to
+     * @param addConflictToChannel add conflict reference to channel if true
      */
     private void getIMConflicts(
             @NotNull final Channel channel,
-            @NotNull final List<Intermod> intermods
+            @NotNull final List<Intermod> intermods,
+            @NotNull final List<Conflict> conflicts,
+            final boolean addConflictToChannel
     ) {
         final int rangeLo = channel.getFreq() - channel.getEquipment().getMaxImSpacing();
         final int rangeHi = channel.getFreq() + channel.getEquipment().getMaxImSpacing();
@@ -204,21 +240,26 @@ final class Analyser {
 
         // Loop over intermods until out of upper danger range of channel
         while (imIndex < intermods.size() && intermods.get(imIndex).getFreq() < rangeHi) {
-            getChannelIMConflicts(channel, intermods.get(imIndex));
+            getChannelIMConflicts(channel, intermods.get(imIndex), conflicts, addConflictToChannel);
             imIndex++;
         }
     }
 
     /**
      * Method to calculate conflicts generated between a single channel and
-     * a single intermod.
+     * a single intermod and add them to a list of conflicts. Adds conflicts
+     * to conflicts list and to relevant channel if flag is set.
      *
      * @param channel channel to test
      * @param intermod intermod to test against
+     * @param conflicts list to add generated conflicts to
+     * @param addConflictToChannel add conflict reference to channel if true
      */
     private void getChannelIMConflicts(
             @NotNull final Channel channel,
-            @NotNull final Intermod intermod
+            @NotNull final Intermod intermod,
+            @NotNull final List<Conflict> conflicts,
+            final boolean addConflictToChannel
     ) {
         if (intermod.getF1() == channel || intermod.getF2() == channel || intermod.getF3() == channel) {
             return;
@@ -253,31 +294,47 @@ final class Analyser {
 
         final int difference = Math.abs(channel.getFreq() - intermod.getFreq());
         if (maxSpacing != null && maxSpacing > difference) {
-            final Conflict newConflict = new Conflict(channel, intermod);
+            Conflict newConflict = new Conflict(channel, intermod);
             conflicts.add(newConflict);
-            channel.addConflict(newConflict);
+            if (addConflictToChannel) {
+                channel.addConflict(newConflict);
+            }
         }
     }
 
     /**
      * Method to test one channel against a list of channels. The channel may
-     * be in the list.
+     * or may not be in the list. Adds conflicts to conflicts list and to
+     * relevant channel if flag is set.
      *
      * @param newChannel channel to compare
+     * @param conflicts list to add generated conflicts to
+     * @param addConflictToNewChannel add conflict reference to channel if true
+     * @param addConflictToListChannel add conflict reference to channel in
+     *                                 channel list if true
      */
-    private void getChannelConflicts(@NotNull final Channel newChannel) {
+    private void getChannelConflicts(
+            @NotNull final Channel newChannel,
+            @NotNull final List<Conflict> conflicts,
+            final boolean addConflictToNewChannel,
+            final boolean addConflictToListChannel
+    ) {
         for (Channel channel : channels) {
             final int difference = Math.abs(channel.getFreq() - newChannel.getFreq());
             if (channel != newChannel) {
                 if (difference < channel.getEquipment().getChannelSpacing()) {
                     final Conflict newConflict = new Conflict(channel, newChannel);
                     conflicts.add(newConflict);
-                    channel.addConflict(newConflict);
+                    if (addConflictToNewChannel) {
+                        channel.addConflict(newConflict);
+                    }
                 }
                 if (difference < newChannel.getEquipment().getChannelSpacing()) {
                     final Conflict newConflict = new Conflict(newChannel, channel);
                     conflicts.add(newConflict);
-                    newChannel.addConflict(newConflict);
+                    if (addConflictToListChannel) {
+                        newChannel.addConflict(newConflict);
+                    }
                 }
             }
         }

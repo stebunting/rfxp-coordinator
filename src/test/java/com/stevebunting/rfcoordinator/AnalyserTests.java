@@ -254,4 +254,53 @@ class AnalyserTests {
                 num2T9OConflicts,
                 num3T3OConflicts);
     }
+
+    @DisplayName("generate analysis with checking")
+    @Test
+    final void testGenerateAnalysisWithChecking() throws InvalidFrequencyException {
+        Equipment equipment = new Equipment("RFXp", "Equipment", 400, 900, 5, 500, 200, 100, 50, 25, 100);
+        List<Double> frequencies = new ArrayList<>(Arrays.asList(
+                720.560, 721.980, 723.605, 724.255, 724.785,
+                726.025, 726.745, 727.255, 728.140, 729.185,
+                729.765, 730.915, 732.195, 733.040, 734.500,
+                735.410, 736.280, 737.505, 738.135, 738.735
+        ));
+        Collections.shuffle(frequencies);
+
+        int numConflicts = 540;
+        int numChannelConflicts = 0;
+        int num2T3OConflicts = 68;
+        int num2T5OConflicts = 24;
+        int num2T7OConflicts = 10;
+        int num2T9OConflicts = 2;
+        int num3T3OConflicts = 436;
+
+        for (int i = 0; i < frequencies.size(); i++) {
+            final int channelsBefore = analyser.getChannelList().size();
+            final int intermodsBefore = analyser.getIntermodList().size();
+            final int conflictsBefore = analyser.getConflictList().size();
+
+            final int newConflicts = analyser.checkArtifacts(new Channel(null, frequencies.get(i), equipment));
+            final int expectedConflicts = analyser.getConflictList().size() + newConflicts;
+
+            assertEquals(channelsBefore, analyser.getChannelList().size());
+            assertEquals(intermodsBefore, analyser.getIntermodList().size());
+            assertEquals(conflictsBefore, analyser.getConflictList().size());
+
+            analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
+            assertEquals(expectedConflicts, analyser.getConflictList().size());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodList());
+        }
+
+        assertEquals(frequencies.size(), analyser.getChannelList().size());
+        TestHelpers.assertConflicts(analyser.getConflictList(),
+                numConflicts,
+                numChannelConflicts,
+                num2T3OConflicts,
+                num2T5OConflicts,
+                num2T7OConflicts,
+                num2T9OConflicts,
+                num3T3OConflicts);
+    }
 }

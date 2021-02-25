@@ -1,9 +1,7 @@
 package com.stevebunting.rfcoordinator;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -163,6 +161,43 @@ class CoordinationTests {
             assertEquals(760525, channelArray[0].getFreq());
             assertEquals(420425, channelArray[1].getFreq());
             assertEquals(600000, channelArray[2].getFreq());
+        }
+
+        @DisplayName("throws an error when null equipment is passed to check channel method")
+        @Test
+        final void testCheckInvalidEquipmentChannel() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    coordination.checkChannel(600.0, null));
+        }
+
+        @DisplayName("check a duplicate channel")
+        @Test
+        final void testCheckDuplicateChannel() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 780.125, 780.550, 780.900, 781.125, 781.375, 781.775 };
+            for (int i = 0; i < frequencies.length; i++) {
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            }
+            assertEquals(19, coordination.getNumConflicts());
+
+            NewChannelReport channelReport = coordination.checkChannel(780.900, equipmentProfiles.get(3));
+            assertEquals(true, channelReport.isDuplicate());
+            assertEquals(Channel.Validity.INVALID, channelReport.isValid());
+            assertEquals(10, channelReport.getConflicts());
+        }
+
+        @DisplayName("check a valid channel")
+        @Test
+        final void testCheckValidChannel() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 546.45, 582.625, 618.5, 629, 663.275, 790.575, 861.125 };
+            for (int i = 0; i < frequencies.length; i++) {
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            }
+            assertEquals(0, coordination.getNumConflicts());
+
+            NewChannelReport channelReport = coordination.checkChannel(788.875, equipmentProfiles.get(3));
+            assertEquals(false, channelReport.isDuplicate());
+            assertEquals(Channel.Validity.VALID, channelReport.isValid());
+            assertEquals(0, channelReport.getConflicts());
         }
     }
 
@@ -455,17 +490,13 @@ class CoordinationTests {
             @DisplayName("ang generates no conflicts in passing test case (11 frequencies in 1 TV Ch)")
             @Test
             final void testPassingCase() throws InvalidFrequencyException {
-                coordination.addChannel(606.200, equipment);
-                coordination.addChannel(606.600, equipment);
-                coordination.addChannel(607.300, equipment);
-                coordination.addChannel(608.175, equipment);
-                coordination.addChannel(608.525, equipment);
-                coordination.addChannel(609.350, equipment);
-                coordination.addChannel(611.525, equipment);
-                coordination.addChannel(611.825, equipment);
-                coordination.addChannel(612.275, equipment);
-                coordination.addChannel(613.275, equipment);
-                coordination.addChannel(613.925, equipment);
+                double[] frequencies = new double[]{
+                    606.200, 606.600, 607.300, 608.175, 608.525, 609.350,
+                    611.525, 611.825, 612.275, 613.275, 613.925
+                };
+                for (int i = 0; i < frequencies.length; i++) {
+                    coordination.addChannel(frequencies[i], equipment);
+                }
                 assertEquals(0, coordination.getNumConflicts());
             }
         }

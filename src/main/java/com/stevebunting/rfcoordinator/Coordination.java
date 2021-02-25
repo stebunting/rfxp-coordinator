@@ -3,7 +3,7 @@ package com.stevebunting.rfcoordinator;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
-final public class Coordination {
+final class Coordination {
 
     // Counter to assign id's to channels
     private int idCounter = 0;
@@ -22,13 +22,12 @@ final public class Coordination {
         if (equipment == null) {
             throw new IllegalArgumentException("A valid equipment profile must be supplied");
         }
-        final int id = idCounter;
+        final int id = idCounter++;
 
-        Channel newChannel = new Channel(id, frequency, equipment);
+        final Channel newChannel = new Channel(id, frequency, equipment);
         channels.add(newChannel);
         analyser.addChannel(newChannel);
 
-        idCounter++;
         return id;
     }
 
@@ -46,7 +45,7 @@ final public class Coordination {
 
     // Update a channels name
     final Channel updateChannel(final int id, @NotNull final String name) {
-        Channel channelToUpdate = getChannelById(id);
+        final Channel channelToUpdate = getChannelById(id);
         if (channelToUpdate == null) {
             return null;
         }
@@ -59,7 +58,7 @@ final public class Coordination {
             final int id,
             @NotNull final Equipment equipment
     ) throws InvalidFrequencyException {
-        Channel channelToUpdate = getChannelById(id);
+        final Channel channelToUpdate = getChannelById(id);
         if (channelToUpdate == null) {
             return null;
         }
@@ -70,7 +69,7 @@ final public class Coordination {
     }
 
     // Remove channel from coordination, returns null if id is not found
-    public Channel removeChannel(int id) {
+    final Channel removeChannel(final int id) {
         final int index = getChannelIndex(id);
         if (index == -1) {
             return null;
@@ -80,6 +79,33 @@ final public class Coordination {
 
         return removedChannel;
     }
+
+    // Method to check a channel before addition
+    final NewChannelReport checkChannel(
+            final double frequency,
+            @NotNull final Equipment profile
+    ) throws InvalidFrequencyException {
+
+        // Check for duplicates
+        boolean isDuplicate = false;
+        for (Channel channel : channels) {
+            if (channel.getFreq() == Channel.mHzToKHz(frequency)) {
+                isDuplicate = true;
+                break;
+            }
+        }
+
+        // Create report
+        Channel channelToCheck = new Channel(null, frequency, profile);
+        final int numConflicts = analyser.checkArtifacts(channelToCheck);
+        NewChannelReport report = new NewChannelReport(
+                numConflicts,
+                channelToCheck.getValidity(),
+                isDuplicate);
+
+        return report;
+    }
+
 
     // Get channel index from id, returns -1 if not found
     private int getChannelIndex(int id) {
@@ -92,18 +118,18 @@ final public class Coordination {
         return -1;
     }
 
-    public Channel[] getChannels() {
-        Channel[] channelArray = new Channel[channels.size()];
-        return channels.toArray(channelArray);
-    }
-
     // Get channel by id
-    public Channel getChannelById(int id) {
+    final Channel getChannelById(int id) {
         final int index = getChannelIndex(id);
         if (index == -1) {
             return null;
         }
         return channels.get(index);
+    }
+
+    final Channel[] getChannels() {
+        final Channel[] channelArray = new Channel[channels.size()];
+        return channels.toArray(channelArray);
     }
 
     // Get number of channels
