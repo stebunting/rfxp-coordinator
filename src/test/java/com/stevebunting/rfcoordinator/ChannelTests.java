@@ -282,19 +282,23 @@ class ChannelTests {
         @DisplayName("sort channels by ID")
         @Test
         final void testChannelSortById() throws InvalidFrequencyException {
+            Comparator<Channel> sortByID = new ChannelIDComparator();
+
             Channel higherChannel = new Channel(65, 100.0, equipment);
             Channel lowerChannel = new Channel(null, 0, equipment);
             Channel equalChannel = new Channel(25, 600.250, equipment);
             Channel strictEqualChannel = new Channel(25, 500.450, equipment);
-            assertTrue(Channel.sortByID().compare(channel, higherChannel) < 0);
-            assertTrue(Channel.sortByID().compare(channel, lowerChannel) > 0);
-            assertTrue(Channel.sortByID().compare(channel, equalChannel) < 0);
-            assertEquals(0, Channel.sortByID().compare(channel, strictEqualChannel));
+            assertTrue(sortByID.compare(channel, higherChannel) < 0);
+            assertTrue(sortByID.compare(channel, lowerChannel) > 0);
+            assertTrue(sortByID.compare(channel, equalChannel) < 0);
+            assertEquals(0, sortByID.compare(channel, strictEqualChannel));
         }
 
         @DisplayName("sort channels by name")
         @Test
         final void testChannelSortByName() throws InvalidFrequencyException {
+            Comparator<Channel> sortByName = new ChannelNameComparator();
+
             Channel higherChannel = new Channel(null, 250, equipment);
             Channel lowerChannel = new Channel(null, 250, equipment);
             Channel equalChannel = new Channel(null, 250, equipment);
@@ -304,10 +308,10 @@ class ChannelTests {
             lowerChannel.setName("mab comes before Mai");
             equalChannel.setName("Main");
             strictEqualChannel.setName("Main");
-            assertTrue(Channel.sortByName().compare(channel, higherChannel) < 0);
-            assertTrue(Channel.sortByName().compare(channel, lowerChannel) > 0);
-            assertTrue(Channel.sortByName().compare(channel, equalChannel) > 0);
-            assertEquals(0, Channel.sortByName().compare(channel, strictEqualChannel));
+            assertTrue(sortByName.compare(channel, higherChannel) < 0);
+            assertTrue(sortByName.compare(channel, lowerChannel) > 0);
+            assertTrue(sortByName.compare(channel, equalChannel) > 0);
+            assertEquals(0, sortByName.compare(channel, strictEqualChannel));
         }
 
         @DisplayName("get correctly formatted Channel string (XXX.XXX MHz)")
@@ -368,7 +372,7 @@ class ChannelTests {
         @DisplayName("by ID")
         @Test
         final void testSortChannelListByID() {
-            channelList.sort(Channel.sortByID());
+            channelList.sort(new ChannelIDComparator());
             assertSame(channel5, channelList.get(0));
             assertSame(channel1, channelList.get(1));
             assertSame(channel3, channelList.get(2));
@@ -385,7 +389,7 @@ class ChannelTests {
             channel4 = new Channel(null, 900, equipment);
             channel5 = new Channel(null, 500, equipment);
             channelList = new ArrayList<>(Arrays.asList(channel1, channel2, channel3, channel4, channel5));
-            channelList.sort(Channel.sortByID());
+            channelList.sort(new ChannelIDComparator());
             assertSame(channel3, channelList.get(0));
             assertSame(channel5, channelList.get(1));
             assertSame(channel1, channelList.get(2));
@@ -396,7 +400,7 @@ class ChannelTests {
         @DisplayName("by name")
         @Test
         final void testSortChannelListByName() {
-            channelList.sort(Channel.sortByName());
+            channelList.sort(new ChannelNameComparator());
             assertSame(channel1, channelList.get(0));
             assertSame(channel3, channelList.get(1));
             assertSame(channel4, channelList.get(2));
@@ -408,7 +412,7 @@ class ChannelTests {
         @Test
         final void testSortChannelListByNameThenFrequency() {
             channelList.forEach(channel -> channel.setName("Name"));
-            channelList.sort(Channel.sortByName());
+            channelList.sort(new ChannelNameComparator());
             assertSame(channel3, channelList.get(0));
             assertSame(channel5, channelList.get(1));
             assertSame(channel1, channelList.get(2));

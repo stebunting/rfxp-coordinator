@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @DisplayName("Coordination Class...")
 class CoordinationTests {
@@ -147,6 +148,43 @@ class CoordinationTests {
             assertNull(updatedChannel);
         }
 
+        @DisplayName("throws an error when null equipment is passed to test channel method")
+        @Test
+        final void testTestInvalidEquipmentChannel() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    coordination.testChannel(600.0, null));
+        }
+
+        @DisplayName("test a duplicate channel")
+        @Test
+        final void testTestDuplicateChannel() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 780.125, 780.550, 780.900, 781.125, 781.375, 781.775 };
+            for (int i = 0; i < frequencies.length; i++) {
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            }
+            assertEquals(19, coordination.getNumConflicts());
+
+            NewChannelReport channelReport = coordination.testChannel(780.900, equipmentProfiles.get(3));
+            assertEquals(true, channelReport.isDuplicate());
+            assertEquals(Channel.Validity.INVALID, channelReport.isValid());
+            assertEquals(10, channelReport.getConflicts());
+        }
+
+        @DisplayName("test a valid channel")
+        @Test
+        final void testTestValidChannel() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 546.45, 582.625, 618.5, 629, 663.275, 790.575, 861.125 };
+            for (int i = 0; i < frequencies.length; i++) {
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            }
+            assertEquals(0, coordination.getNumConflicts());
+
+            NewChannelReport channelReport = coordination.testChannel(788.875, equipmentProfiles.get(3));
+            assertEquals(false, channelReport.isDuplicate());
+            assertEquals(Channel.Validity.VALID, channelReport.isValid());
+            assertEquals(0, channelReport.getConflicts());
+        }
+
         @DisplayName("get a plain array of channels")
         @Test
         final void testGetChannelArray() throws InvalidFrequencyException {
@@ -163,41 +201,73 @@ class CoordinationTests {
             assertEquals(600000, channelArray[2].getFreq());
         }
 
-        @DisplayName("throws an error when null equipment is passed to check channel method")
+        @DisplayName("sorts a coordination by frequency")
         @Test
-        final void testCheckInvalidEquipmentChannel() {
-            assertThrows(IllegalArgumentException.class, () ->
-                    coordination.checkChannel(600.0, null));
+        final void testSortCoordinationByFrequency() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
+            for (int i = 0; i < frequencies.length; i++) {
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
+            }
+            coordination.setSortBy(Coordination.SortBy.FREQUENCY);
+            coordination.sort();
+            Channel[] channelList = coordination.getChannels();
+            for (int i = 0; i < channelList.length - 1; i++) {
+                assert(channelList[i].getFreq() <= channelList[i + 1].getFreq());
+            }
         }
 
-        @DisplayName("check a duplicate channel")
+        @DisplayName("default null coordination by id")
         @Test
-        final void testCheckDuplicateChannel() throws InvalidFrequencyException {
-            double[] frequencies = new double[]{ 780.125, 780.550, 780.900, 781.125, 781.375, 781.775 };
+        final void testNullSortCoordinationByID() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
             for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
             }
-            assertEquals(19, coordination.getNumConflicts());
-
-            NewChannelReport channelReport = coordination.checkChannel(780.900, equipmentProfiles.get(3));
-            assertEquals(true, channelReport.isDuplicate());
-            assertEquals(Channel.Validity.INVALID, channelReport.isValid());
-            assertEquals(10, channelReport.getConflicts());
+            coordination.setSortBy(null);
+            coordination.sort();
+            Channel[] channelList = coordination.getChannels();
+            for (int i = 0; i < channelList.length - 1; i++) {
+                assert(channelList[i].getId() <= channelList[i + 1].getId());
+            }
         }
 
-        @DisplayName("check a valid channel")
+        @DisplayName("sorts a coordination by id")
         @Test
-        final void testCheckValidChannel() throws InvalidFrequencyException {
-            double[] frequencies = new double[]{ 546.45, 582.625, 618.5, 629, 663.275, 790.575, 861.125 };
+        final void testSortCoordinationByID() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
             for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
             }
-            assertEquals(0, coordination.getNumConflicts());
+            coordination.setSortBy(Coordination.SortBy.FREQUENCY);
+            coordination.sort();
+            Channel[] channelList = coordination.getChannels();
+            for (int i = 0; i < channelList.length - 1; i++) {
+                assert(channelList[i].getFreq() <= channelList[i + 1].getFreq());
+            }
+            coordination.setSortBy(Coordination.SortBy.ID);
+            coordination.sort();
+            channelList = coordination.getChannels();
+            for (int i = 0; i < channelList.length; i++) {
+                assertEquals(Channel.mHzToKHz(frequencies[i]), channelList[i].getFreq());
+            }
+        }
 
-            NewChannelReport channelReport = coordination.checkChannel(788.875, equipmentProfiles.get(3));
-            assertEquals(false, channelReport.isDuplicate());
-            assertEquals(Channel.Validity.VALID, channelReport.isValid());
-            assertEquals(0, channelReport.getConflicts());
+        @DisplayName("sorts a coordination by name")
+        @Test
+        final void testSortCoordinationByName() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
+            String[] names = new String[] { "d", "f", "a", "g", "e", "b", "c", "h" };
+
+            for (int i = 0; i < frequencies.length; i++) {
+                int id = coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
+                coordination.updateChannel(id, names[i]);
+            }
+            coordination.setSortBy(Coordination.SortBy.NAME);
+            coordination.sort();
+            Channel[] channelList = coordination.getChannels();
+            for (int i = 0; i < channelList.length - 1; i++) {
+                assert(channelList[i].getName().compareTo(channelList[i + 1].getName()) < 0);
+            }
         }
     }
 

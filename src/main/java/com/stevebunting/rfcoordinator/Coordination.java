@@ -2,7 +2,13 @@ package com.stevebunting.rfcoordinator;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
+/**
+ * Coordination is the main interaction point. It offers methods to add,
+ * remove, update and check channels in the coordination.
+ */
 final class Coordination {
 
     // Counter to assign id's to channels
@@ -14,7 +20,17 @@ final class Coordination {
     // Analyser class
     final private Analyser analyser = new Analyser();
 
-    // Add new channel to coordination
+    enum SortBy { ID, FREQUENCY, NAME }
+    private Comparator<Channel> sortBy = new ChannelIDComparator();
+
+    /**
+     * Add a new channel to the coordination.
+     *
+     * @param frequency new channel frequency in MHz
+     * @param equipment equipment type
+     * @return ID of the new channel
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
     final int addChannel(
             final double frequency,
             @NotNull final Equipment equipment
@@ -31,7 +47,14 @@ final class Coordination {
         return id;
     }
 
-    // Update a channels frequency
+    /**
+     * Update a channels frequency.
+     *
+     * @param id ID of channel to update
+     * @param frequency new channel frequency in MHz
+     * @return the channel object
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
     final Channel updateChannel(final int id, final double frequency) throws InvalidFrequencyException {
         final Channel channelToUpdate = getChannelById(id);
         if (channelToUpdate == null) {
@@ -43,7 +66,13 @@ final class Coordination {
         return channelToUpdate;
     }
 
-    // Update a channels name
+    /**
+     * Update a channels name.
+     *
+     * @param id ID of channel to update
+     * @param name new channel name
+     * @return the channel object
+     */
     final Channel updateChannel(final int id, @NotNull final String name) {
         final Channel channelToUpdate = getChannelById(id);
         if (channelToUpdate == null) {
@@ -53,7 +82,14 @@ final class Coordination {
         return channelToUpdate;
     }
 
-    // Update a channels equipment
+    /**
+     * Update a channels equipment.
+     *
+     * @param id ID of channel to update
+     * @param equipment new channel equipment type
+     * @return the channel object
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
     final Channel updateChannel(
             final int id,
             @NotNull final Equipment equipment
@@ -68,7 +104,12 @@ final class Coordination {
         return channelToUpdate;
     }
 
-    // Remove channel from coordination, returns null if id is not found
+    /**
+     * Remove a channel from the coordination.
+     *
+     * @param id ID of channel to remove
+     * @return the removed channel or null if channel is not found
+     */
     final Channel removeChannel(final int id) {
         final int index = getChannelIndex(id);
         if (index == -1) {
@@ -80,8 +121,15 @@ final class Coordination {
         return removedChannel;
     }
 
-    // Method to check a channel before addition
-    final NewChannelReport checkChannel(
+    /**
+     * Check the impact a new channel will have on the coordination.
+     *
+     * @param frequency frequency of channel to check in MHz
+     * @param profile equipment type of channel to check
+     * @return NewChannelReport
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
+    final NewChannelReport testChannel(
             final double frequency,
             @NotNull final Equipment profile
     ) throws InvalidFrequencyException {
@@ -107,10 +155,14 @@ final class Coordination {
     }
 
 
-    // Get channel index from id, returns -1 if not found
+    /**
+     * Get channels index in channels ArrayList from id.
+     *
+     * @param id ID of channel to find
+     * @return index of channel in channels ArrayList or -1 if not found
+     */
     private int getChannelIndex(int id) {
-        final int numChannels = channels.size();
-        for (int index = 0; index < numChannels; index++) {
+        for (int index = 0; index < channels.size(); index++) {
             if (channels.get(index).getId() == id) {
                 return index;
             }
@@ -118,7 +170,12 @@ final class Coordination {
         return -1;
     }
 
-    // Get channel by id
+    /**
+     * Get channel from channels ArrayList from id.
+     *
+     * @param id ID of channel to find
+     * @return channel requested or null if not found
+     */
     final Channel getChannelById(int id) {
         final int index = getChannelIndex(id);
         if (index == -1) {
@@ -127,6 +184,43 @@ final class Coordination {
         return channels.get(index);
     }
 
+    /**
+     * Sort channel list using stored comparator.
+     */
+    final void sort() {
+        Collections.sort(channels, sortBy);
+    }
+
+    /**
+     * Set channel sort order.
+     *
+     * @param sortBy required sort order
+     */
+    final void setSortBy(SortBy sortBy) {
+        if (sortBy == null) {
+            sortBy = SortBy.ID;
+        }
+        switch (sortBy) {
+            case FREQUENCY:
+                this.sortBy = new ChannelFrequencyComparator();
+                break;
+
+            case NAME:
+                this.sortBy = new ChannelNameComparator();
+                break;
+
+            default:
+            case ID:
+                this.sortBy = new ChannelIDComparator();
+                break;
+        }
+    }
+
+    /**
+     * Get channel array
+     *
+     * @return array of channels
+     */
     final Channel[] getChannels() {
         final Channel[] channelArray = new Channel[channels.size()];
         return channels.toArray(channelArray);
