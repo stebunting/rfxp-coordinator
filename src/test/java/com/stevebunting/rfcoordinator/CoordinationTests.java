@@ -271,6 +271,106 @@ class CoordinationTests {
         }
     }
 
+    @DisplayName("edits channels by...")
+    @Nested
+    class CoordinationEditTests {
+
+        @BeforeEach
+        void setUp() {
+            coordination = new Coordination();
+        }
+
+        @DisplayName("not updating frequency before start editing called")
+        @Test
+        final void testNoUpdateFrequencyBeforeStartEditing() throws InvalidFrequencyException {
+            int id = coordination.addChannel(388.5, equipmentProfiles.get(5));
+            coordination.editChannel(670.427);
+            Channel channel = coordination.getChannelById(id);
+            assertEquals(388500, channel.getFreq());
+        }
+
+        @DisplayName("not updating name before start editing called")
+        @Test
+        final void testNoUpdateNameBeforeStartEditing() throws InvalidFrequencyException {
+            int id = coordination.addChannel(388.5, equipmentProfiles.get(5));
+            coordination.editChannel("No Update Name");
+            Channel channel = coordination.getChannelById(id);
+            assertEquals("Channel 1", channel.getName());
+        }
+
+        @DisplayName("not updating equipment before start editing called")
+        @Test
+        final void testNoUpdateEquipmentBeforeStartEditing() throws InvalidFrequencyException {
+            int id = coordination.addChannel(388.5, equipmentProfiles.get(5));
+            coordination.editChannel(equipmentProfiles.get(0));
+            Channel channel = coordination.getChannelById(id);
+            assertNotSame(equipmentProfiles.get(0), channel.getEquipment());
+            assertSame(equipmentProfiles.get(5), channel.getEquipment());
+        }
+
+        @DisplayName("storing and restoring channel")
+        @Test
+        final void testStoreEditChannelAndRestore() throws InvalidFrequencyException {
+            int id = coordination.addChannel(388.5, equipmentProfiles.get(5));
+            coordination.startEditingChannel(id);
+            coordination.editChannel("Updated name");
+            coordination.editChannel(670.425);
+            coordination.editChannel(equipmentProfiles.get(2));
+            coordination.restoreEditingChannel();
+            coordination.stopEditingChannel();
+
+            Channel channel = coordination.getChannelById(id);
+            assertEquals(0, channel.getId());
+            assertEquals("Channel 1", channel.getName());
+            assertEquals(388500, channel.getFreq());
+            assertSame(equipmentProfiles.get(5), channel.getEquipment());
+        }
+
+        @DisplayName("retaining updates")
+        @Test
+        final void testEditChannelUpdatesRetained() throws InvalidFrequencyException {
+            int id = coordination.addChannel(767.225, equipmentProfiles.get(6));
+            coordination.startEditingChannel(id);
+            coordination.editChannel("Updated name");
+            coordination.editChannel(670.425);
+            coordination.editChannel(equipmentProfiles.get(2));
+            coordination.stopEditingChannel();
+
+            Channel channel = coordination.getChannelById(id);
+            assertEquals(0, channel.getId());
+            assertEquals("Updated name", channel.getName());
+            assertEquals(670425, channel.getFreq());
+            assertSame(equipmentProfiles.get(2), channel.getEquipment());
+        }
+
+        @DisplayName("preventing restoration after editing is stopped")
+        @Test
+        final void testEditChannelPreventsRestoreAfterStop() throws InvalidFrequencyException {
+            int id = coordination.addChannel(767.225, equipmentProfiles.get(6));
+            coordination.startEditingChannel(id);
+            coordination.editChannel("Updated name");
+            coordination.stopEditingChannel();
+            coordination.restoreEditingChannel();
+
+            Channel channel = coordination.getChannelById(id);
+            assertEquals("Updated name", channel.getName());
+            assertEquals(767225, channel.getFreq());
+            assertSame(equipmentProfiles.get(6), channel.getEquipment());
+        }
+
+        @DisplayName("preventing restoration after channel removed")
+        @Test
+        final void testEditChannelPreventsRestoreAfterRemove() throws InvalidFrequencyException {
+            int id = coordination.addChannel(767.225, equipmentProfiles.get(6));
+            coordination.startEditingChannel(id);
+            coordination.editChannel("Updated name");
+            coordination.removeChannel(id);
+            coordination.restoreEditingChannel();
+
+            assertNull(coordination.getChannelById(id));
+        }
+    }
+
     @DisplayName("calculates intermodulations...")
     @Nested
     class IntermodulationCalculationTests {

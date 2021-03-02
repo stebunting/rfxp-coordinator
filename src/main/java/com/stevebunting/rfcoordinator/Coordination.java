@@ -20,8 +20,54 @@ final class Coordination {
     // Analyser class
     final private Analyser analyser = new Analyser();
 
+    // Editing channel
+    private Channel editChannel = null;
+
     enum SortBy { ID, FREQUENCY, NAME }
     private Comparator<Channel> sortBy = new ChannelIDComparator();
+
+    final void startEditingChannel(final int id) {
+        final Channel channel = getChannelById(id);
+        editChannel = channel.deepCopy();
+    }
+
+    final void stopEditingChannel() {
+        editChannel = null;
+    }
+
+    final void editChannel(@NotNull final String name) {
+        if (editChannel == null) {
+            return;
+        }
+        updateChannel(editChannel.getId(), name);
+    }
+
+    final void editChannel(final double frequency) throws InvalidFrequencyException {
+        if (editChannel == null) {
+            return;
+        }
+        updateChannel(editChannel.getId(), frequency);
+    }
+
+    final void editChannel(@NotNull final Equipment equipment) throws InvalidFrequencyException {
+        if (editChannel == null) {
+            return;
+        }
+        updateChannel(editChannel.getId(), equipment);
+    }
+
+    final void restoreEditingChannel() throws InvalidFrequencyException {
+        if (editChannel == null) {
+            return;
+        }
+        Channel channelToRestore = getChannelById(editChannel.getId());
+        if (channelToRestore == null) {
+            return;
+        }
+        channelToRestore.setName(editChannel.getName());
+        channelToRestore.setFreqAndEquipment(editChannel.getFreq(), editChannel.getEquipment());
+        analyser.updateChannel(channelToRestore);
+    }
 
     /**
      * Add a new channel to the coordination.
@@ -153,7 +199,6 @@ final class Coordination {
 
         return report;
     }
-
 
     /**
      * Get channels index in channels ArrayList from id.
