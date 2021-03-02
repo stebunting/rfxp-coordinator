@@ -24,7 +24,7 @@ class ChannelTests {
             assertEquals(25, channel.getId());
             assertEquals(500450, channel.getFreq());
             assertEquals("Channel 26", channel.getName());
-            assertTrue(channel.getEquipment().equals(equipment));
+            assertEquals(channel.getEquipment(), equipment);
             assertEquals(Channel.Validity.VALID, channel.getValidity());
         }
 
@@ -104,8 +104,15 @@ class ChannelTests {
         final void testSetEquipment() throws InvalidFrequencyException {
             Equipment newEquipment = new Equipment("Shure", "PSM900", 500, 600, 50, 500, 200, 100, 50, 40, 80);
             channel.setEquipment(newEquipment);
-            assertTrue(channel.getEquipment().equals(newEquipment));
-            assertFalse(channel.getEquipment().equals(equipment));
+            assertEquals(channel.getEquipment(), newEquipment);
+            assertNotEquals(channel.getEquipment(), equipment);
+        }
+
+        @DisplayName("throw when setting new equipment as null")
+        @Test
+        final void testSetEquipmentAsNull() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> channel.setEquipment(null));
         }
 
         @DisplayName("do not set null equipment")
@@ -256,16 +263,19 @@ class ChannelTests {
         @Test
         final void testChannelEquality() throws InvalidFrequencyException {
             Channel comparisonChannel = new Channel(25, 500.450, equipment);
-            assertTrue(channel.equals(comparisonChannel));
+            assertEquals(channel, comparisonChannel);
+
+            assertNotEquals(channel, null);
+            assertEquals(channel, channel);
 
             comparisonChannel = new Channel(24, 500.450, equipment);
-            assertFalse(channel.equals(comparisonChannel));
+            assertNotEquals(channel, comparisonChannel);
 
             comparisonChannel = new Channel(25, 503.450, equipment);
-            assertFalse(channel.equals(comparisonChannel));
+            assertNotEquals(channel, comparisonChannel);
 
             comparisonChannel = new Channel(25, 500.450, new Equipment("Test", "Equipment", 0, 0, 1, 0, 0, 0, 0, 0, 0));
-            assertFalse(channel.equals(comparisonChannel));
+            assertNotEquals(channel, comparisonChannel);
         }
 
         @DisplayName("sort channels naturally (by frequency)")
@@ -328,6 +338,24 @@ class ChannelTests {
             newChannel = new Channel(0, 895.82536452123, equipment);
             assertEquals("895.825", newChannel.toString());
             assertEquals("895.825 MHz", newChannel.toStringWithMHz());
+        }
+
+        @DisplayName("create a deep copy")
+        @Test
+        final void testChannelDeepCopy() throws InvalidFrequencyException {
+            Channel channel = new Channel(87, 546.75, "Channel to Copy", equipment);
+            Channel channelCopy = channel.deepCopy();
+
+            assertEquals(channel, channelCopy);
+            assertNotSame(channel, channelCopy);
+            assertEquals(channel.getId(), channelCopy.getId());
+            assertEquals(channel.getFreq(), channelCopy.getFreq());
+            assertEquals(channel.getName(), channelCopy.getName());
+            assertSame(channel.getName(), channelCopy.getName());
+            assertEquals(channel.getEquipment(), channelCopy.getEquipment());
+            assertSame(channel.getEquipment(), channelCopy.getEquipment());
+            assertEquals(channel.getNumConflicts(), channelCopy.getNumConflicts());
+            assertEquals(channel.getValidity(), channelCopy.getValidity());
         }
     }
 

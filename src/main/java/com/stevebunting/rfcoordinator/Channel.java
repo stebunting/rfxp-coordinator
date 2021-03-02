@@ -32,11 +32,23 @@ class Channel implements Comparable<Channel> {
     private Validity validity;
 
     // Array to store channels conflicts
-    private final ArrayList<Conflict> conflicts;
+    private final ArrayList<Conflict> conflicts = new ArrayList<>();
 
     // Constructor to create channel with frequency
-    Channel(final Integer id, final double frequency, @NotNull final Equipment equipment)
-            throws InvalidFrequencyException {
+    Channel(
+            final Integer id,
+            final double frequency,
+            @NotNull final Equipment equipment
+    ) throws InvalidFrequencyException {
+        this(id, frequency, String.format("Channel %d", id != null ? id + 1 : 1), equipment);
+    }
+
+    Channel(
+            final Integer id,
+            final double frequency,
+            @NotNull final String name,
+            @NotNull final Equipment equipment
+    ) throws InvalidFrequencyException {
         if (equipment == null) {
             throw new IllegalArgumentException("A valid equipment profile must be supplied");
         }
@@ -46,8 +58,7 @@ class Channel implements Comparable<Channel> {
         this.frequency = mHzToKHz(frequency);
         this.equipment = equipment;
         this.id = id != null ? id : 0;
-        this.name = String.format(locale, "Channel %d", this.id + 1);
-        this.conflicts = new ArrayList<>();
+        this.name = name;
         setValidity();
     }
 
@@ -56,8 +67,28 @@ class Channel implements Comparable<Channel> {
         return frequency % equipment.getTuningAccuracy() != 0;
     }
 
+    // Method to return a new channel instance with the same data
+    // Equipment is still a reference to the master equipment array
+    final Channel deepCopy() {
+        Channel channelCopy;
+        try {
+            channelCopy = new Channel(id, kHzToMHz(frequency), name, equipment);
+        } catch (InvalidFrequencyException e) {
+            return null;
+        }
+        for (Conflict conflict: conflicts) {
+            channelCopy.addConflict(conflict);
+        }
+        return channelCopy;
+    }
+
     // COMPARING METHODS
-    public final boolean equals(Channel that) {
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Channel)) {
+            return false;
+        }
+        Channel that = (Channel) obj;
         return this.getEquipment().equals(that.getEquipment())
                 && this.getName().equals(that.getName())
                 && this.getFreq() == that.getFreq();
@@ -91,22 +122,6 @@ class Channel implements Comparable<Channel> {
         return id;
     }
 
-    // Return frequency in kHz
-    final int getFreq() {
-        return frequency;
-    }
-
-    final void setFreq(int frequency) throws InvalidFrequencyException {
-        if (isEquipmentUntunable(frequency, this.equipment)) {
-            throw new InvalidFrequencyException();
-        }
-        this.frequency = frequency;
-    }
-
-    final void setFreq(double frequency) throws InvalidFrequencyException {
-        setFreq(mHzToKHz(frequency));
-    }
-
     final String getName() {
         return name;
     }
@@ -115,17 +130,39 @@ class Channel implements Comparable<Channel> {
         this.name = name;
     }
 
+    // Return frequency in kHz
+    final int getFreq() {
+        return frequency;
+    }
+
     final Equipment getEquipment() {
         return equipment;
     }
 
+    final void setFreq(int frequency) throws InvalidFrequencyException {
+        setFreqAndEquipment(frequency, equipment);
+    }
+
+    final void setFreq(double frequency) throws InvalidFrequencyException {
+        setFreqAndEquipment(frequency, equipment);
+    }
+
     final void setEquipment(@NotNull final Equipment equipment) throws InvalidFrequencyException {
+        setFreqAndEquipment(this.frequency, equipment);
+    }
+
+    final void setFreqAndEquipment(double frequency, @NotNull final Equipment equipment) throws InvalidFrequencyException {
+        setFreqAndEquipment(mHzToKHz(frequency), equipment);
+    }
+
+    final void setFreqAndEquipment(int frequency, @NotNull final Equipment equipment) throws InvalidFrequencyException {
         if (equipment == null) {
             throw new IllegalArgumentException("Equipment must not be null");
         }
-        if (isEquipmentUntunable(this.frequency, equipment)) {
+        if (isEquipmentUntunable(frequency, equipment)) {
             throw new InvalidFrequencyException();
         }
+        this.frequency = frequency;
         this.equipment = equipment;
     }
 
