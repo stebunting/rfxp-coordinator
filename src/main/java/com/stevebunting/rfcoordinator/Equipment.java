@@ -57,7 +57,12 @@ public class Equipment {
 
     // OBJECT OVERRIDES
     // Method to check equality
-    boolean equals(Equipment that) {
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Equipment)) {
+            return false;
+        }
+        Equipment that = (Equipment) obj;
         return (this.getManufacturer().equals(that.getManufacturer())
                 && this.getModel().equals(that.getModel())
                 && this.getRangeLo() == that.getRangeLo()

@@ -133,6 +133,14 @@ class IntermodTests {
             assertEquals("3T3O", Intermod.Type.IM_3T3O.pretty());
         }
 
+        @DisplayName("check for basic equality")
+        @Test
+        final void testBasicEquality() {
+            Intermod intermod = new Intermod(Intermod.Type.IM_2T3O, channel1, channel2, null);
+            assertEquals(intermod, intermod);
+            assertNotEquals(intermod, null);
+        }
+
         @DisplayName("compare intermodulations")
         @Test
         final void testCompareToFrequency() {
@@ -143,8 +151,8 @@ class IntermodTests {
             assertTrue(intermod.compareTo(intermodHi) < 0);
             assertTrue(intermodHi.compareTo(intermodLo) > 0);
 
-            assertTrue(intermod.equals(intermodLo));
-            assertFalse(intermod.equals(intermodHi));
+            assertEquals(intermod, intermodLo);
+            assertNotEquals(intermod, intermodHi);
         }
 
         @DisplayName("compare intermodulation frequencies")
@@ -158,8 +166,8 @@ class IntermodTests {
             assertTrue(intermod.compareTo(intermodHi) < 0);
             assertTrue(intermodHi.compareTo(intermodLo) > 0);
 
-            assertTrue(intermod.equals(intermodLo));
-            assertFalse(intermod.equals(intermodHi));
+            assertEquals(intermod, intermodLo);
+            assertNotEquals(intermod, intermodHi);
         }
 
         @DisplayName("compare intermodulation channel 1 frequencies")
@@ -174,8 +182,8 @@ class IntermodTests {
             assertTrue(intermod.compareTo(intermodHi) < 0);
             assertTrue(intermodHi.compareTo(intermodLo) > 0);
 
-            assertTrue(intermod.equals(intermodLo));
-            assertFalse(intermod.equals(intermodHi));
+            assertEquals(intermod, intermodLo);
+            assertNotEquals(intermod, intermodHi);
         }
 
         @DisplayName("compare intermodulation channel 2 frequencies")
@@ -191,8 +199,8 @@ class IntermodTests {
             assertTrue(intermod.compareTo(intermodHi) < 0);
             assertTrue(intermodHi.compareTo(intermodLo) > 0);
 
-            assertTrue(intermod.equals(intermodLo));
-            assertFalse(intermod.equals(intermodHi));
+            assertEquals(intermod, intermodLo);
+            assertNotEquals(intermod, intermodHi);
         }
 
         @DisplayName("compare intermodulation channel 3 frequencies")
@@ -202,8 +210,8 @@ class IntermodTests {
             Intermod intermodLo = new Intermod(Intermod.Type.IM_3T3O, channel1, channel2, channel3);
             Intermod intermodHi = new Intermod(Intermod.Type.IM_3T3O, channel1, channel2, new Channel(0, 607.1, equipment));
 
-            assertTrue(intermod.equals(intermodLo));
-            assertFalse(intermod.equals(intermodHi));
+            assertEquals(intermod, intermodLo);
+            assertNotEquals(intermod, intermodHi);
         }
 
         @DisplayName("get human readable description of Conflict")

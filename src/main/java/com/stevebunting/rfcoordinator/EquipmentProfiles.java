@@ -1,9 +1,6 @@
 package com.stevebunting.rfcoordinator;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 enum EquipmentProfiles {

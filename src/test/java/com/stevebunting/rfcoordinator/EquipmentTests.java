@@ -24,18 +24,20 @@ class EquipmentTests {
         @DisplayName("measure equality for each component between 2 equipment objects")
         @Test
         final void testEquipmentEquality() {
-            assertTrue(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Not Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "Not PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 0, 900, 25, 300, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 0, 25, 300, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 0, 300, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 0, 100, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 300, 0, 90, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 0, 0, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 1000, 0, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 1000, 50)));
-            assertFalse(equipment.equals(new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 0)));
+            assertEquals(equipment, equipment);
+            assertNotEquals(equipment, null);
+            assertEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 900, 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 0, 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 0, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 0, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 0, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 0, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 1000, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 1000, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 0));
         }
 
         @DisplayName("get human readable description of equipment")

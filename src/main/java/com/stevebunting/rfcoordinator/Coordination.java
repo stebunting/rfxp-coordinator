@@ -2,7 +2,6 @@ package com.stevebunting.rfcoordinator;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 /**
@@ -20,52 +19,83 @@ final class Coordination {
     // Analyser class
     final private Analyser analyser = new Analyser();
 
-    // Editing channel
-    private Channel editChannel = null;
+    // Current editing channel
+    private Channel editChannelBackup = null;
 
     enum SortBy { ID, FREQUENCY, NAME }
     private Comparator<Channel> sortBy = new ChannelIDComparator();
 
+    /**
+     * Declare channel that is to be edited.
+     *
+     * @param id ID of channel to edit
+     */
     final void startEditingChannel(final int id) {
         final Channel channel = getChannelById(id);
-        editChannel = channel.deepCopy();
+        editChannelBackup = channel.deepCopy();
     }
 
+    /**
+     * Stop editing a channel. Resets instance variable to null.
+     */
     final void stopEditingChannel() {
-        editChannel = null;
+        editChannelBackup = null;
     }
 
+    /**
+     * Update the current editing channels name.
+     *
+     * @param name name to update with
+     */
     final void editChannel(@NotNull final String name) {
-        if (editChannel == null) {
+        if (editChannelBackup == null) {
             return;
         }
-        updateChannel(editChannel.getId(), name);
+        updateChannel(editChannelBackup.getId(), name);
     }
 
+    /**
+     * Update the current editing channels frequency.
+     *
+     * @param frequency frequency to update channel with
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
     final void editChannel(final double frequency) throws InvalidFrequencyException {
-        if (editChannel == null) {
+        if (editChannelBackup == null) {
             return;
         }
-        updateChannel(editChannel.getId(), frequency);
+        updateChannel(editChannelBackup.getId(), frequency);
     }
 
+    /**
+     * Update the current editing channels equipment.
+     *
+     * @param equipment equipment to update channel with
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
     final void editChannel(@NotNull final Equipment equipment) throws InvalidFrequencyException {
-        if (editChannel == null) {
+        if (editChannelBackup == null) {
             return;
         }
-        updateChannel(editChannel.getId(), equipment);
+        updateChannel(editChannelBackup.getId(), equipment);
     }
 
+    /**
+     * Restores the channel that is being edited to the state it was in before
+     * editing started.
+     *
+     * @throws InvalidFrequencyException on invalid frequency / equipment combination
+     */
     final void restoreEditingChannel() throws InvalidFrequencyException {
-        if (editChannel == null) {
+        if (editChannelBackup == null) {
             return;
         }
-        Channel channelToRestore = getChannelById(editChannel.getId());
+        Channel channelToRestore = getChannelById(editChannelBackup.getId());
         if (channelToRestore == null) {
             return;
         }
-        channelToRestore.setName(editChannel.getName());
-        channelToRestore.setFreqAndEquipment(editChannel.getFreq(), editChannel.getEquipment());
+        channelToRestore.setName(editChannelBackup.getName());
+        channelToRestore.setFreqAndEquipment(editChannelBackup.getFreq(), editChannelBackup.getEquipment());
         analyser.updateChannel(channelToRestore);
     }
 
@@ -192,12 +222,10 @@ final class Coordination {
         // Create report
         Channel channelToCheck = new Channel(null, frequency, profile);
         final int numConflicts = analyser.checkArtifacts(channelToCheck);
-        NewChannelReport report = new NewChannelReport(
+        return new NewChannelReport(
                 numConflicts,
                 channelToCheck.getValidity(),
                 isDuplicate);
-
-        return report;
     }
 
     /**
@@ -233,7 +261,7 @@ final class Coordination {
      * Sort channel list using stored comparator.
      */
     final void sort() {
-        Collections.sort(channels, sortBy);
+        channels.sort(sortBy);
     }
 
     /**

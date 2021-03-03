@@ -71,7 +71,12 @@ class Intermod implements Comparable<Intermod> {
         }
     }
 
-    public boolean equals(Intermod that) {
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Intermod)) {
+            return false;
+        }
+        Intermod that = (Intermod) obj;
         return (this.getFreq() == that.getFreq()
                 && this.getType() == that.getType()
                 && this.getF1().getFreq() == that.getF1().getFreq()
