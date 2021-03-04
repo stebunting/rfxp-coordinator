@@ -369,6 +369,43 @@ class CoordinationTests {
 
             assertNull(coordination.getChannelById(id));
         }
+
+        @DisplayName("doing big edits")
+        @Test
+        final void testEditChannelInCoordination() throws InvalidFrequencyException {
+            double[] frequencies = new double[]{
+                    473.550, 479.675, 493.450, 500.850, 518.525, 540.750,
+                    553.775, 566.075, 584.225, 617.650, 621.200, 640.550,
+                    644.900, 671.400, 704.575, 723.375, 733.600, 733.900,
+                    759.150, 767.550, 823.775, 851.650, 854.200, 857.075,
+                    907.050, 918.200, 922.900, 923.350, 939.875, 947.675
+            };
+
+            for (int i = 0; i < frequencies.length; i++) {
+                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            }
+
+            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 36, 0, 0, 0, 0, 0, 36);
+
+            coordination.startEditingChannel(0);
+            coordination.editChannel(829.375);
+            coordination.stopEditingChannel();
+
+            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 32, 0, 0, 0, 0, 0, 32);
+
+            coordination.startEditingChannel(8);
+            coordination.editChannel(947.325);
+            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 24, 0, 0, 0, 0, 0, 24);
+            coordination.restoreEditingChannel();
+            coordination.stopEditingChannel();
+
+            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 32, 0, 0, 0, 0, 0, 32);
+
+            coordination.startEditingChannel(9);
+            coordination.editChannel(equipmentProfiles.getByName("Sennheiser", "2000 IEM"));
+            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 37, 0, 0, 0, 0, 0, 37);
+            coordination.stopEditingChannel();
+        }
     }
 
     @DisplayName("calculates intermodulations...")

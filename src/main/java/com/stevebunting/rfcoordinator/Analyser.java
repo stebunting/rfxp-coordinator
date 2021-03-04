@@ -22,6 +22,15 @@ final class Analyser {
     // Intermodulation Calculations to make
     final private AnalyserCalculations calculations = new AnalyserCalculations();
 
+    // Number of invalid channels
+    private int numInvalidChannels = 0;
+    private int numChannelConflicts = 0;
+    private int num2t3oIMConflicts = 0;
+    private int num2t5oIMConflicts = 0;
+    private int num2t7oIMConflicts = 0;
+    private int num2t9oIMConflicts = 0;
+    private int num3t3oIMConflicts = 0;
+
     /**
      * Method to add a new channel to the analysis
      *
@@ -107,6 +116,11 @@ final class Analyser {
         getIMConflicts(channel, intermods, newConflicts, true);
         getIMConflicts(channels, newIntermods, newConflicts, false);
         getChannelConflicts(channel, newConflicts, true, false);
+
+        // Remove channel conflicts from counters
+        for (Conflict conflict : channel.getConflicts()) {
+            incrementConflictCounter(conflict, -1);
+        }
 
         return newConflicts.size();
     }
@@ -297,7 +311,7 @@ final class Analyser {
             Conflict newConflict = new Conflict(channel, intermod);
             conflicts.add(newConflict);
             if (addConflictToChannel) {
-                channel.addConflict(newConflict);
+                addConflict(channel, newConflict);
             }
         }
     }
@@ -326,14 +340,14 @@ final class Analyser {
                     final Conflict newConflict = new Conflict(channel, newChannel);
                     conflicts.add(newConflict);
                     if (addConflictToNewChannel) {
-                        channel.addConflict(newConflict);
+                        addConflict(channel, newConflict);
                     }
                 }
                 if (difference < newChannel.getEquipment().getChannelSpacing()) {
                     final Conflict newConflict = new Conflict(newChannel, channel);
                     conflicts.add(newConflict);
                     if (addConflictToListChannel) {
-                        newChannel.addConflict(newConflict);
+                        addConflict(newChannel, newConflict);
                     }
                 }
             }
@@ -362,13 +376,13 @@ final class Analyser {
     private void removeConflicts(@NotNull final Channel channel) {
         conflicts.removeIf((Conflict conflict) -> {
             if (conflict.getChannel() == channel) {
-                channel.removeConflict(conflict);
+                removeConflict(channel, conflict);
                 return true;
             }
             switch (conflict.getType()) {
                 case CHANNEL_SPACING:
                     if (conflict.getConflictChannel() == channel) {
-                        conflict.getChannel().removeConflict(conflict);
+                        removeConflict(conflict.getChannel(), conflict);
                         return true;
                     }
                     return false;
@@ -377,7 +391,7 @@ final class Analyser {
                     if (conflict.getConflictIntermod().getF1() == channel
                      || conflict.getConflictIntermod().getF2() == channel
                      || conflict.getConflictIntermod().getF3() == channel) {
-                        conflict.getChannel().removeConflict(conflict);
+                        removeConflict(conflict.getChannel(), conflict);
                         return true;
                     }
                     return false;
@@ -386,6 +400,74 @@ final class Analyser {
                     return false;
             }
         });
+    }
+
+    /**
+     * Method to add a single conflict reference to a channel and update
+     * invalid channels and conflicts counters.
+     *
+     * @param channel channel to add conflict to
+     * @param conflict conflict to add
+     */
+    private void addConflict(@NotNull final Channel channel, @NotNull final Conflict conflict) {
+        incrementConflictCounter(conflict, 1);
+        if (channel.getValidity() == Channel.Validity.VALID) {
+            numInvalidChannels++;
+        }
+        channel.addConflict(conflict);
+    }
+
+    /**
+     * Method to remove a single conflict reference from a channel and update
+     * invalid channels counter.
+     *
+     * @param channel channel to remove conflict from
+     * @param conflict conflict to remove
+     */
+    private void removeConflict(@NotNull final Channel channel, @NotNull final Conflict conflict) {
+        incrementConflictCounter(conflict, -1);
+        final boolean invalidBefore = channel.getValidity() != Channel.Validity.VALID;
+
+        channel.removeConflict(conflict);
+
+        if (invalidBefore && channel.getValidity() == Channel.Validity.VALID) {
+            numInvalidChannels--;
+        }
+    }
+
+    /**
+     * Method to increment or decrement conflict counters depending on conflict
+     * type.
+     *
+     * @param conflict conflict to check
+     * @param incrementor integer to increment counter by (typically 1 or -1)
+     */
+    private void incrementConflictCounter(@NotNull final Conflict conflict, final int incrementor) {
+        if (conflict.getType() == Conflict.Type.CHANNEL_SPACING) {
+            numChannelConflicts += incrementor;
+        } else if (conflict.getType() == Conflict.Type.INTERMOD_SPACING) {
+            switch (conflict.getConflictIntermod().getType()) {
+                case IM_2T3O:
+                    num2t3oIMConflicts += incrementor;
+                    break;
+
+                case IM_2T5O:
+                    num2t5oIMConflicts += incrementor;
+                    break;
+
+                case IM_2T7O:
+                    num2t7oIMConflicts += incrementor;
+                    break;
+
+                case IM_2T9O:
+                    num2t9oIMConflicts += incrementor;
+                    break;
+
+                case IM_3T3O:
+                    num3t3oIMConflicts += incrementor;
+                    break;
+            }
+        }
     }
 
     /**
@@ -448,5 +530,33 @@ final class Analyser {
 
     final AnalyserCalculations getCalculations() {
         return calculations;
+    }
+
+    final int getValidChannels() {
+        return channels.size() - numInvalidChannels;
+    }
+
+    final int getNumChannelConflicts() {
+        return numChannelConflicts;
+    }
+
+    final int getNum2t3oIMConflicts() {
+        return num2t3oIMConflicts;
+    }
+
+    final int getNum2t5oIMConflicts() {
+        return num2t5oIMConflicts;
+    }
+
+    final int getNum2t7oIMConflicts() {
+        return num2t7oIMConflicts;
+    }
+
+    final int getNum2t9oIMConflicts() {
+        return num2t9oIMConflicts;
+    }
+
+    final int getNum3t3oIMConflicts() {
+        return num3t3oIMConflicts;
     }
 }

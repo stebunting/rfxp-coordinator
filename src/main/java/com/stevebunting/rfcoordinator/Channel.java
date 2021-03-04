@@ -2,6 +2,7 @@ package com.stevebunting.rfcoordinator;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 class Channel implements Comparable<Channel> {
@@ -181,6 +182,11 @@ class Channel implements Comparable<Channel> {
         }
     }
 
+    /**
+     * Add a reference to a relevant conflict to the channels conflict list.
+     *
+     * @param conflict conflict to add
+     */
     final void addConflict(final Conflict conflict) {
         if (conflict != null) {
             conflicts.add(conflict);
@@ -203,5 +209,9 @@ class Channel implements Comparable<Channel> {
 
     final int getNumConflicts() {
         return conflicts.size();
+    }
+
+    final List<Conflict> getConflicts() {
+        return conflicts;
     }
 }

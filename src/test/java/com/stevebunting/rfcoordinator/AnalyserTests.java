@@ -40,29 +40,22 @@ class AnalyserTests {
         ));
         Collections.shuffle(frequencies);
 
-        int numConflicts = 0;
-        int numChannelConflicts = 0;
-        int num2T3OConflicts = 0;
-        int num2T5OConflicts = 0;
-        int num2T7OConflicts = 0;
-        int num2T9OConflicts = 0;
-        int num3T3OConflicts = 0;
-
         for (int i = 0; i < frequencies.size(); i++) {
             analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
             TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(i + 1, analyser.getValidChannels());
         }
 
         assertEquals(frequencies.size(), analyser.getChannelList().size());
-        TestHelpers.assertConflicts(analyser.getConflictList(),
-                numConflicts,
-                numChannelConflicts,
-                num2T3OConflicts,
-                num2T5OConflicts,
-                num2T7OConflicts,
-                num2T9OConflicts,
-                num3T3OConflicts);
+        assertEquals(11, analyser.getValidChannels());
+        assertEquals(0, analyser.getConflictList().size());
+        assertEquals(0, analyser.getNumChannelConflicts());
+        assertEquals(0, analyser.getNum2t3oIMConflicts());
+        assertEquals(0, analyser.getNum2t5oIMConflicts());
+        assertEquals(0, analyser.getNum2t7oIMConflicts());
+        assertEquals(0, analyser.getNum2t9oIMConflicts());
+        assertEquals(0, analyser.getNum3t3oIMConflicts());
     }
 
     @DisplayName("generate invalid analysis")
@@ -74,14 +67,6 @@ class AnalyserTests {
         ));
         Collections.shuffle(frequencies);
 
-        int numConflicts = 112;
-        int numChannelConflicts = 6;
-        int num2T3OConflicts = 18;
-        int num2T5OConflicts = 20;
-        int num2T7OConflicts = 0;
-        int num2T9OConflicts = 0;
-        int num3T3OConflicts = 68;
-
         for (int i = 0; i < frequencies.size(); i++) {
             analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
@@ -89,14 +74,14 @@ class AnalyserTests {
         }
 
         assertEquals(frequencies.size(), analyser.getChannelList().size());
-        TestHelpers.assertConflicts(analyser.getConflictList(),
-                numConflicts,
-                numChannelConflicts,
-                num2T3OConflicts,
-                num2T5OConflicts,
-                num2T7OConflicts,
-                num2T9OConflicts,
-                num3T3OConflicts);
+        assertEquals(0, analyser.getValidChannels());
+        assertEquals(112, analyser.getConflictList().size());
+        assertEquals(6, analyser.getNumChannelConflicts());
+        assertEquals(18, analyser.getNum2t3oIMConflicts());
+        assertEquals(20, analyser.getNum2t5oIMConflicts());
+        assertEquals(0, analyser.getNum2t7oIMConflicts());
+        assertEquals(0, analyser.getNum2t9oIMConflicts());
+        assertEquals(68, analyser.getNum3t3oIMConflicts());
     }
 
     @DisplayName("remove channels cleanly")
@@ -114,50 +99,43 @@ class AnalyserTests {
             TestHelpers.assertIsSorted(analyser.getIntermodList());
         }
 
-        int numConflicts = 61;
-        int numChannelConflicts = 4;
-        int num2T3OConflicts = 10;
-        int num2T5OConflicts = 3;
-        int num2T7OConflicts = 0;
-        int num2T9OConflicts = 0;
-        int num3T3OConflicts = 44;
-
         assertEquals(frequencies.size(), analyser.getChannelList().size());
-        TestHelpers.assertConflicts(analyser.getConflictList(),
-                numConflicts,
-                numChannelConflicts,
-                num2T3OConflicts,
-                num2T5OConflicts,
-                num2T7OConflicts,
-                num2T9OConflicts,
-                num3T3OConflicts);
+        assertEquals(0, analyser.getValidChannels());
+        assertEquals(61, analyser.getConflictList().size());
+        assertEquals(4, analyser.getNumChannelConflicts());
+        assertEquals(10, analyser.getNum2t3oIMConflicts());
+        assertEquals(3, analyser.getNum2t5oIMConflicts());
+        assertEquals(0, analyser.getNum2t7oIMConflicts());
+        assertEquals(0, analyser.getNum2t9oIMConflicts());
+        assertEquals(44, analyser.getNum3t3oIMConflicts());
 
         int[] frequenciesToRemove = new int[]{
                 769100, 765800, 768275, 763975, 767975, 770575,
                 771100, 770025, 765250, 764250, 768550, 766125};
         int[] conflicts = new int[]{44, 24, 10, 8, 2, 0, 0, 0, 0, 0, 0, 0};
-        int[] channelConflicts = new int[]{4, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        int[] im2t3oConflicts = new int[]{8, 8, 4, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        int[] im2t5oConflicts = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        int[] im2t7oConflicts = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        int[] im2t9oConflicts = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        int[] im3t3oConflicts = new int[]{32, 12, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] channelConflicts = new int[]{4, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] im2t3oConflicts = new int[]{8, 8, 4, 4, 2, 0, 0, 0, 0, 0, 0, 0};
+        int[] im2t5oConflicts = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] im2t7oConflicts = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] im2t9oConflicts = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] im3t3oConflicts = new int[]{32, 12, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] validChannels = new int[]{0, 2, 2, 2, 5, 6, 5, 4, 3, 2, 1, 0};
         for (int i = 0; i < frequenciesToRemove.length; i++) {
             for (int j = 0; j < analyser.getChannelList().size(); j++) {
                 if (analyser.getChannelList().get(j).getFreq() == frequenciesToRemove[i]) {
                     Channel channel = analyser.getChannelList().get(j);
                     analyser.removeChannel(channel);
 
+                    assertEquals(validChannels[i], analyser.getValidChannels());
                     assertEquals(frequenciesToRemove.length - i - 1, analyser.getChannelList().size());
                     assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-                    TestHelpers.assertConflicts(analyser.getConflictList(),
-                            conflicts[i],
-                            channelConflicts[i],
-                            im2t3oConflicts[i],
-                            im2t5oConflicts[i],
-                            im2t7oConflicts[i],
-                            im2t9oConflicts[i],
-                            im3t3oConflicts[i]);
+                    assertEquals(conflicts[i], analyser.getConflictList().size());
+                    assertEquals(channelConflicts[i], analyser.getNumChannelConflicts());
+                    assertEquals(im2t3oConflicts[i], analyser.getNum2t3oIMConflicts());
+                    assertEquals(im2t5oConflicts[i], analyser.getNum2t5oIMConflicts());
+                    assertEquals(im2t7oConflicts[i], analyser.getNum2t7oIMConflicts());
+                    assertEquals(im2t9oConflicts[i], analyser.getNum2t9oIMConflicts());
+                    assertEquals(im3t3oConflicts[i], analyser.getNum3t3oIMConflicts());
                     TestHelpers.assertIsSorted(analyser.getIntermodList());
                     break;
                 }
@@ -167,7 +145,7 @@ class AnalyserTests {
 
     @DisplayName("generate valid analysis from updates")
     @Test
-    final void testGenerateValidAnalysisFromUpdates() throws InvalidFrequencyException{
+    final void testGenerateValidAnalysisFromUpdates() throws InvalidFrequencyException  {
         List<Double> frequencies = new ArrayList<>(Arrays.asList(
                 470.05, 470.6, 471.35, 471.95, 472.35, 474.8,
                 475.25, 475.6, 476.75, 477.05, 478.0
@@ -177,12 +155,21 @@ class AnalyserTests {
             analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
             TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(i + 1, analyser.getValidChannels());
+            assertEquals(0, analyser.getConflictList().size());
+            assertEquals(0, analyser.getNumChannelConflicts());
+            assertEquals(0, analyser.getNum2t3oIMConflicts());
+            assertEquals(0, analyser.getNum2t5oIMConflicts());
+            assertEquals(0, analyser.getNum2t7oIMConflicts());
+            assertEquals(0, analyser.getNum2t9oIMConflicts());
+            assertEquals(0, analyser.getNum3t3oIMConflicts());
         }
 
         List<Double> newFrequencies = new ArrayList<>(Arrays.asList(
                 578.250, 590.500, 563.100, 562.250, 575.250, 577.075,
                 581.000, 583.450, 577.825, 578.100, 592.250
         ));
+        int[] validChannels = new int[]{11, 11, 11, 11, 11, 4, 7, 11, 11, 6, 3};
 
         for (int i = 0; i < analyser.getChannelList().size(); i++) {
             Channel channelToUpdate = analyser.getChannelList().get(0);
@@ -192,25 +179,17 @@ class AnalyserTests {
 
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
             TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(validChannels[i], analyser.getValidChannels());
         }
 
-        int numConflicts = 11;
-        int numChannelConflicts = 4;
-        int num2T3OConflicts = 2;
-        int num2T5OConflicts = 1;
-        int num2T7OConflicts = 0;
-        int num2T9OConflicts = 0;
-        int num3T3OConflicts = 4;
-
         assertEquals(frequencies.size(), analyser.getChannelList().size());
-        TestHelpers.assertConflicts(analyser.getConflictList(),
-                numConflicts,
-                numChannelConflicts,
-                num2T3OConflicts,
-                num2T5OConflicts,
-                num2T7OConflicts,
-                num2T9OConflicts,
-                num3T3OConflicts);
+        assertEquals(11, analyser.getConflictList().size());
+        assertEquals(4, analyser.getNumChannelConflicts());
+        assertEquals(2, analyser.getNum2t3oIMConflicts());
+        assertEquals(1, analyser.getNum2t5oIMConflicts());
+        assertEquals(0, analyser.getNum2t7oIMConflicts());
+        assertEquals(0, analyser.getNum2t9oIMConflicts());
+        assertEquals(4, analyser.getNum3t3oIMConflicts());
     }
 
     @DisplayName("generate analysis with different equipment types")
@@ -237,22 +216,14 @@ class AnalyserTests {
         analyser.addChannel(new Channel(null, 591.45, ias));
         analyser.addChannel(new Channel(null, 585.225, ias));
 
-        int numConflicts = 200;
-        int numChannelConflicts = 6;
-        int num2T3OConflicts = 21;
-        int num2T5OConflicts = 5;
-        int num2T7OConflicts = 0;
-        int num2T9OConflicts = 0;
-        int num3T3OConflicts = 168;
-
-        TestHelpers.assertConflicts(analyser.getConflictList(),
-                numConflicts,
-                numChannelConflicts,
-                num2T3OConflicts,
-                num2T5OConflicts,
-                num2T7OConflicts,
-                num2T9OConflicts,
-                num3T3OConflicts);
+        assertEquals(0, analyser.getValidChannels());
+        assertEquals(200, analyser.getConflictList().size());
+        assertEquals(6, analyser.getNumChannelConflicts());
+        assertEquals(21, analyser.getNum2t3oIMConflicts());
+        assertEquals(5, analyser.getNum2t5oIMConflicts());
+        assertEquals(0, analyser.getNum2t7oIMConflicts());
+        assertEquals(0, analyser.getNum2t9oIMConflicts());
+        assertEquals(168, analyser.getNum3t3oIMConflicts());
     }
 
     @DisplayName("generate analysis with checking")
@@ -266,14 +237,6 @@ class AnalyserTests {
                 735.410, 736.280, 737.505, 738.135, 738.735
         ));
         Collections.shuffle(frequencies);
-
-        int numConflicts = 540;
-        int numChannelConflicts = 0;
-        int num2T3OConflicts = 68;
-        int num2T5OConflicts = 24;
-        int num2T7OConflicts = 10;
-        int num2T9OConflicts = 2;
-        int num3T3OConflicts = 436;
 
         for (int i = 0; i < frequencies.size(); i++) {
             final int channelsBefore = analyser.getChannelList().size();
@@ -294,13 +257,12 @@ class AnalyserTests {
         }
 
         assertEquals(frequencies.size(), analyser.getChannelList().size());
-        TestHelpers.assertConflicts(analyser.getConflictList(),
-                numConflicts,
-                numChannelConflicts,
-                num2T3OConflicts,
-                num2T5OConflicts,
-                num2T7OConflicts,
-                num2T9OConflicts,
-                num3T3OConflicts);
+        assertEquals(540, analyser.getConflictList().size());
+        assertEquals(0, analyser.getNumChannelConflicts());
+        assertEquals(68, analyser.getNum2t3oIMConflicts());
+        assertEquals(24, analyser.getNum2t5oIMConflicts());
+        assertEquals(10, analyser.getNum2t7oIMConflicts());
+        assertEquals(2, analyser.getNum2t9oIMConflicts());
+        assertEquals(436, analyser.getNum3t3oIMConflicts());
     }
 }
