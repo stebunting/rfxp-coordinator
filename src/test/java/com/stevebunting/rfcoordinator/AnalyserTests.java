@@ -11,7 +11,7 @@ import java.util.*;
 class AnalyserTests {
 
     Analyser analyser;
-    final Equipment equipment = new Equipment("Test", "Equipment", 0, 1000, 25, 300, 100, 90, 0, 0, 50);
+    final Equipment equipment = new Equipment("Test", "Equipment", 25, 300, 100, 90, 0, 0, 50);
     final EquipmentProfiles equipmentProfiles = EquipmentProfiles.INSTANCE;
 
     @BeforeEach
@@ -229,7 +229,7 @@ class AnalyserTests {
     @DisplayName("generate analysis with checking")
     @Test
     final void testGenerateAnalysisWithChecking() throws InvalidFrequencyException {
-        Equipment equipment = new Equipment("RFXp", "Equipment", 400, 900, 5, 500, 200, 100, 50, 25, 100);
+        Equipment equipment = new Equipment("RFXp", "Equipment", 5, 500, 200, 100, 50, 25, 100);
         List<Double> frequencies = new ArrayList<>(Arrays.asList(
                 720.560, 721.980, 723.605, 724.255, 724.785,
                 726.025, 726.745, 727.255, 728.140, 729.185,

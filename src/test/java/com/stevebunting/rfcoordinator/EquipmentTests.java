@@ -18,7 +18,31 @@ class EquipmentTests {
 
         @BeforeEach
         void setUp() {
-            equipment = new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50);
+        }
+
+        @DisplayName("ensure validity of frequency without range")
+        @Test
+        final void testFrequencyValidity() {
+            assert(equipment.isFrequencyValid(500750));
+            assertFalse(equipment.isFrequencyValid(500751));
+        }
+
+        @DisplayName("ensure validity of frequency with range")
+        @Test
+        final void testFrequencyValidityWithRange() {
+            Range range = new Range(400000, 500000, "Generic");
+            Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50, range);
+            assert(equipment.isFrequencyValid(450025));
+            assertFalse(equipment.isFrequencyValid(450026));
+            assert(equipment.isFrequencyValid(400000));
+            assertFalse(equipment.isFrequencyValid(399999));
+            assertFalse(equipment.isFrequencyValid(399975));
+            assert(equipment.isFrequencyValid(500000));
+            assertFalse(equipment.isFrequencyValid(500001));
+            assertFalse(equipment.isFrequencyValid(500025));
+            assertFalse(equipment.isFrequencyValid(200300));
+            assertFalse(equipment.isFrequencyValid(800075));
         }
 
         @DisplayName("measure equality for each component between 2 equipment objects")
@@ -26,44 +50,57 @@ class EquipmentTests {
         final void testEquipmentEquality() {
             assertEquals(equipment, equipment);
             assertNotEquals(equipment, null);
-            assertEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 900, 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 0, 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 0, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 0, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 0, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 0, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 1000, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 1000, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 0));
+            assertEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 25, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 300, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 0, 100, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 0, 90, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 0, 0, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 1000, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 1000, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 0));
         }
 
-        @DisplayName("get human readable description of equipment")
+        @DisplayName("get human readable description of equipment without range")
         @Test
-        final void testToString() {
+        final void testToStringNoRange() {
             assertEquals("Shure PSM900", equipment.toString());
+        }
+
+        @DisplayName("get human readable description of equipment with range")
+        @Test
+        final void testToStringWithRange() {
+            equipment.setRange(new Range(400, 500, "GB"));
+            assertEquals("Shure PSM900 GB", equipment.toString());
         }
 
         @DisplayName("get human readable description of equipment (no model)")
         @Test
         final void testToStringNoModel() {
-            equipment = new Equipment("Shure", "", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment("Shure", "", 0, 0, 0, 0, 0, 0, 0);
             assertEquals("Shure", equipment.toString());
 
-            equipment = new Equipment("Shure", null, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment("Shure", null, 0, 0, 0, 0, 0, 0, 0);
             assertEquals("Shure", equipment.toString());
         }
 
         @DisplayName("get human readable description of equipment (no manufacturer)")
         @Test
         final void testToStringNoManufacturer() {
-            equipment = new Equipment("", "PSM900", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment("", "PSM900", 0, 0, 0, 0, 0, 0, 0);
             assertEquals("PSM900", equipment.toString());
 
-            equipment = new Equipment(null, "PSM900", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment(null, "PSM900", 0, 0, 0, 0, 0, 0, 0);
             assertEquals("PSM900", equipment.toString());
+        }
+
+        @DisplayName("get human readable description of equipment (empty range)")
+        @Test
+        final void testToStringEmptyRange() {
+
+            equipment.setRange(new Range(400, 500, ""));
+            assertEquals("Shure PSM900", equipment.toString());
         }
 
         @DisplayName("get manufacturer name")
@@ -75,7 +112,7 @@ class EquipmentTests {
         @DisplayName("get manufacturer name with blank/null manufacturer")
         @Test
         final void testGetNullManufacturer() {
-            Equipment nullManufacturerEquipment = new Equipment(null, "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50);
+            Equipment nullManufacturerEquipment = new Equipment(null, "PSM900", 25, 300, 100, 90, 0, 0, 50);
             assertEquals("", nullManufacturerEquipment.getManufacturer());
         }
 
@@ -88,20 +125,8 @@ class EquipmentTests {
         @DisplayName("get model name with blank/null model")
         @Test
         final void testGetNullModel() {
-            Equipment nullModelEquipment = new Equipment("Shure", null, 470, 900, 25, 300, 100, 90, 0, 0, 50);
+            Equipment nullModelEquipment = new Equipment("Shure", null, 25, 300, 100, 90, 0, 0, 50);
             assertEquals("", nullModelEquipment.getModel());
-        }
-
-        @DisplayName("get highest tunable frequency (in kHz)")
-        @Test
-        final void testGetRangeHi() {
-            assertEquals(900000, equipment.getRangeHi());
-        }
-
-        @DisplayName("get lowest tunable frequency (in kHz)")
-        @Test
-        final void testGetRangeLo() {
-            assertEquals(470000, equipment.getRangeLo());
         }
 
         @DisplayName("get tuning accuracy (in kHz)")
@@ -151,16 +176,16 @@ class EquipmentTests {
         final void testMaxImSpacing() {
             assertEquals(100, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 150, 0, 0, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 150, 0, 0, 50);
             assertEquals(150, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 200, 0, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 200, 0, 50);
             assertEquals(200, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 250, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 250, 50);
             assertEquals(250, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 350);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 350);
             assertEquals(350, equipment.getMaxImSpacing());
         }
     }

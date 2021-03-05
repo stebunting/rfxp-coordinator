@@ -385,25 +385,55 @@ class CoordinationTests {
                 coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
             }
 
-            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 36, 0, 0, 0, 0, 0, 36);
+            assertEquals(36, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t3oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t5oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t7oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t9oIMConflicts());
+            assertEquals(36, coordination.getAnalyser().getNum3t3oIMConflicts());
 
             coordination.startEditingChannel(0);
             coordination.editChannel(829.375);
             coordination.stopEditingChannel();
 
-            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 32, 0, 0, 0, 0, 0, 32);
+            assertEquals(32, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t3oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t5oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t7oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t9oIMConflicts());
+            assertEquals(32, coordination.getAnalyser().getNum3t3oIMConflicts());
 
             coordination.startEditingChannel(8);
             coordination.editChannel(947.325);
-            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 24, 0, 0, 0, 0, 0, 24);
+            assertEquals(24, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t3oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t5oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t7oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t9oIMConflicts());
+            assertEquals(24, coordination.getAnalyser().getNum3t3oIMConflicts());
             coordination.restoreEditingChannel();
             coordination.stopEditingChannel();
 
-            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 32, 0, 0, 0, 0, 0, 32);
+            assertEquals(32, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t3oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t5oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t7oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t9oIMConflicts());
+            assertEquals(32, coordination.getAnalyser().getNum3t3oIMConflicts());
 
             coordination.startEditingChannel(9);
             coordination.editChannel(equipmentProfiles.get("Sennheiser", "2000 IEM"));
-            TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 37, 0, 0, 0, 0, 0, 37);
+            assertEquals(37, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t3oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t5oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t7oIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNum2t9oIMConflicts());
+            assertEquals(37, coordination.getAnalyser().getNum3t3oIMConflicts());
             coordination.stopEditingChannel();
         }
     }
@@ -542,7 +572,7 @@ class CoordinationTests {
         @Nested
         class ChannelConflictAnalysisTests {
 
-            final Equipment equipment = new Equipment("Test", "Device", 0, 1000, 1, 300, 100, 90, 0, 0, 50);
+            final Equipment equipment = new Equipment("Test", "Device", 1, 300, 100, 90, 0, 0, 50);
 
             @BeforeEach
             void setUp() {
@@ -632,7 +662,7 @@ class CoordinationTests {
         @Nested
         class IMConflictAnalysisTests {
 
-            final Equipment equipment = new Equipment("Test", "Device", 0, 1000, 25, 300, 100, 90, 0, 0, 50);
+            final Equipment equipment = new Equipment("Test", "Device", 25, 300, 100, 90, 0, 0, 50);
 
             @BeforeEach
             void setUp() {

@@ -1,8 +1,6 @@
 [{
   "manufacturer": "Generic",
   "model": "IEM",
-  "rangeLo": 470,
-  "rangeHi": 790,
   "tuningAccuracy": 1,
   "spacingChannel": 300,
   "spacing2t3o": 100,
@@ -13,8 +11,6 @@
 }, {
   "manufacturer": "Generic",
   "model": "Microphone",
-  "rangeLo": 470,
-  "rangeHi": 790,
   "tuningAccuracy": 1,
   "spacingChannel": 300,
   "spacing2t3o": 100,
@@ -25,8 +21,6 @@
 }, {
   "manufacturer": "Sennheiser",
   "model": "2000 IEM",
-  "rangeLo": 606,
-  "rangeHi": 648,
   "tuningAccuracy": 25,
   "spacingChannel": 500,
   "spacing2t3o": 200,
@@ -37,8 +31,6 @@
 }, {
   "manufacturer": "Sennheiser",
   "model": "2000 Mic",
-  "rangeLo": 606,
-  "rangeHi": 648,
   "tuningAccuracy": 25,
   "spacingChannel": 350,
   "spacing2t3o": 170,
@@ -49,8 +41,6 @@
 }, {
   "manufacturer": "Sennheiser",
   "model": "EM6000",
-  "rangeLo": 550,
-  "rangeHi": 638,
   "tuningAccuracy": 25,
   "spacingChannel": 600,
   "spacing2t3o": 25,
@@ -61,8 +51,6 @@
 }, {
   "manufacturer": "Sennheiser",
   "model": "G3/G4 IEM",
-  "rangeLo": 606,
-  "rangeHi": 648,
   "tuningAccuracy": 25,
   "spacingChannel": 500,
   "spacing2t3o": 200,
@@ -73,8 +61,6 @@
 }, {
   "manufacturer": "Sennheiser",
   "model": "G3/G4 Mic",
-  "rangeLo": 606,
-  "rangeHi": 648,
   "tuningAccuracy": 25,
   "spacingChannel": 350,
   "spacing2t3o": 175,
@@ -85,8 +71,6 @@
 }, {
   "manufacturer": "Shure",
   "model": "Axient Digital",
-  "rangeLo": 470,
-  "rangeHi": 636,
   "tuningAccuracy": 25,
   "spacingChannel": 350,
   "spacing2t3o": 75,
@@ -97,8 +81,6 @@
 }, {
   "manufacturer": "Shure",
   "model": "PSM900",
-  "rangeLo": 606,
-  "rangeHi": 648,
   "tuningAccuracy": 25,
   "spacingChannel": 375,
   "spacing2t3o": 275,
@@ -109,8 +91,6 @@
 }, {
   "manufacturer": "Shure",
   "model": "PSM1000",
-  "rangeLo": 606,
-  "rangeHi": 648,
   "tuningAccuracy": 25,
   "spacingChannel": 350,
   "spacing2t3o": 250,
@@ -121,8 +101,6 @@
 }, {
   "manufacturer": "Shure",
   "model": "UHF-R",
-  "rangeLo": 606,
-  "rangeHi": 666,
   "tuningAccuracy": 25,
   "spacingChannel": 325,
   "spacing2t3o": 175,
@@ -133,8 +111,6 @@
 }, {
   "manufacturer": "Shure",
   "model": "ULX-D",
-  "rangeLo": 606,
-  "rangeHi": 670,
   "tuningAccuracy": 25,
   "spacingChannel": 350,
   "spacing2t3o": 75,

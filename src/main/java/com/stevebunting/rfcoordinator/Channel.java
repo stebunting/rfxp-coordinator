@@ -53,7 +53,7 @@ class Channel implements Comparable<Channel> {
         if (equipment == null) {
             throw new IllegalArgumentException("A valid equipment profile must be supplied");
         }
-        if (isEquipmentUntunable(mHzToKHz(frequency), equipment)) {
+        if (!equipment.isFrequencyValid(mHzToKHz(frequency))) {
             throw new InvalidFrequencyException();
         }
         this.frequency = mHzToKHz(frequency);
@@ -61,11 +61,6 @@ class Channel implements Comparable<Channel> {
         this.id = id != null ? id : 0;
         this.name = name;
         setValidity();
-    }
-
-    // Check if equipment and frequency are compatible
-    private boolean isEquipmentUntunable(int frequency, Equipment equipment) {
-        return frequency % equipment.getTuningAccuracy() != 0;
     }
 
     // Method to return a new channel instance with the same data
@@ -160,7 +155,7 @@ class Channel implements Comparable<Channel> {
         if (equipment == null) {
             throw new IllegalArgumentException("Equipment must not be null");
         }
-        if (isEquipmentUntunable(frequency, equipment)) {
+        if (!equipment.isFrequencyValid(frequency)) {
             throw new InvalidFrequencyException();
         }
         this.frequency = frequency;

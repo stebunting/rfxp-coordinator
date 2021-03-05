@@ -22,7 +22,7 @@ enum EquipmentProfiles {
             return mapper.readValue(new File("src/main/resources/data/EquipmentProfiles.json"), Equipment[].class);
         } catch (Exception e) {
             return new Equipment[] {
-                new Equipment(null, "Default", 0, 10000, 1,300, 100, 90, 0, 0, 50)
+                new Equipment(null, "Default", 1,300, 100, 90, 0, 0, 50)
             };
         }
     }

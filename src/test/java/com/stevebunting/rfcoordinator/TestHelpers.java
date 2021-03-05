@@ -54,41 +54,4 @@ class TestHelpers {
         }
         return count;
     }
-
-    // Test Analyser Numbers Add Up
-    static void assertConflicts(
-            List<Conflict> conflicts,
-            int numConflicts,
-            int numChannelConflicts,
-            int num2T3OConflicts,
-            int num2T5OConflicts,
-            int num2T7OConflicts,
-            int num2T9OConflicts,
-            int num3T3OConflicts
-    ) {
-        assertEquals(numConflicts, conflicts.size());
-        assertEquals(numChannelConflicts, count(conflicts, conflict -> {
-            return conflict.getType() == Conflict.Type.CHANNEL_SPACING;
-        }));
-        assertEquals(num2T3OConflicts, count(conflicts, conflict -> {
-            return conflict.getType() == Conflict.Type.INTERMOD_SPACING
-                    && conflict.getConflictIntermod().getType() == Intermod.Type.IM_2T3O;
-        }));
-        assertEquals(num2T5OConflicts, count(conflicts, conflict -> {
-            return conflict.getType() == Conflict.Type.INTERMOD_SPACING
-                    && conflict.getConflictIntermod().getType() == Intermod.Type.IM_2T5O;
-        }));
-        assertEquals(num2T7OConflicts, count(conflicts, conflict -> {
-            return conflict.getType() == Conflict.Type.INTERMOD_SPACING
-                    && conflict.getConflictIntermod().getType() == Intermod.Type.IM_2T7O;
-        }));
-        assertEquals(num2T9OConflicts, count(conflicts, conflict -> {
-            return conflict.getType() == Conflict.Type.INTERMOD_SPACING
-                    && conflict.getConflictIntermod().getType() == Intermod.Type.IM_2T9O;
-        }));
-        assertEquals(num3T3OConflicts, count(conflicts, (Conflict conflict) -> {
-            return conflict.getType() == Conflict.Type.INTERMOD_SPACING
-                    && conflict.getConflictIntermod().getType() == Intermod.Type.IM_3T3O;
-        }));
-    }
 }

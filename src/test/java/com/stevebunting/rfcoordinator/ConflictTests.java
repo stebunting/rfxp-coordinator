@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Conflict Class...")
 class ConflictTests {
 
-    final Equipment equipment = new Equipment("Shure", "PSM900", 470, 900, 25, 300, 100, 90, 0, 0, 50);
+    final Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50);
 
     @DisplayName("constructs channel spacing conflicts that...")
     @Nested
