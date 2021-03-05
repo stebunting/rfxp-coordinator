@@ -2,6 +2,7 @@ package com.stevebunting.rfcoordinator;
 
 import java.io.File;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
 
 enum EquipmentProfiles {
 
@@ -33,11 +34,11 @@ enum EquipmentProfiles {
         return equipmentArray[index];
     }
 
-    final int getCount() {
-        return equipmentArray.length;
-    }
+    final Equipment get(@NotNull String manufacturer, @NotNull String model) {
+        if (manufacturer == null || model == null) {
+            return null;
+        }
 
-    final Equipment getByName(String manufacturer, String model) {
         manufacturer = manufacturer.toLowerCase();
         model = model.toLowerCase();
 
@@ -48,5 +49,9 @@ enum EquipmentProfiles {
             }
         }
         return null;
+    }
+
+    final int getCount() {
+        return equipmentArray.length;
     }
 }

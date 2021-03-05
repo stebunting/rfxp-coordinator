@@ -29,7 +29,6 @@ class EquipmentProfileTests {
     final void testEquipmentProfilesLoaded() {
         assertEquals(equipmentProfiles.getCount(), 12);
         assertNotNull(equipmentProfiles.get(0));
-        //noinspection ConstantConditions
         assertEquals(equipmentProfiles.get(0).toString(), "Generic IEM");
     }
 
@@ -40,9 +39,34 @@ class EquipmentProfileTests {
         fail("Test needs to be written");
     }
 
+    @DisplayName("can get equipment type by name")
+    @Test
+    final void testGetEquipmentByName() {
+        Equipment equipment = equipmentProfiles.get("Shure", "UHF-R");
+        assertNotNull(equipment);
+        assertEquals("Shure UHF-R", equipment.toString());
+    }
+
+    @DisplayName("can get equipment type by case-insensitive name")
+    @Test
+    final void testGetEquipmentByCaseInsensitiveName() {
+        Equipment equipment = equipmentProfiles.get("SENNHEISER", "g3/g4 mic");
+        assertNotNull(equipment);
+        assertEquals("Sennheiser G3/G4 Mic", equipment.toString());
+    }
+
+    @DisplayName("gets null for invalid equipment type")
+    @Test
+    final void testInvalidEquipmentName() {
+        assertNull(equipmentProfiles.get("Invalid", "Equipment"));
+        assertNull(equipmentProfiles.get("", "Model"));
+        assertNull(equipmentProfiles.get("", "Equipment"));
+        assertNull(equipmentProfiles.get("", ""));
+    }
+
     @DisplayName("gets null for invalid equipment indexes")
     @Test
-    final void testInvalidIndexes() {
+    final void testInvalidEquipmentIndexes() {
         assertNull(equipmentProfiles.get(-1));
         assertNull(equipmentProfiles.get(25));
         assertNull(equipmentProfiles.get(12));

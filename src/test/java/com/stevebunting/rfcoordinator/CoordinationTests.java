@@ -402,7 +402,7 @@ class CoordinationTests {
             TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 32, 0, 0, 0, 0, 0, 32);
 
             coordination.startEditingChannel(9);
-            coordination.editChannel(equipmentProfiles.getByName("Sennheiser", "2000 IEM"));
+            coordination.editChannel(equipmentProfiles.get("Sennheiser", "2000 IEM"));
             TestHelpers.assertConflicts(coordination.getAnalyser().getConflictList(), 37, 0, 0, 0, 0, 0, 37);
             coordination.stopEditingChannel();
         }
