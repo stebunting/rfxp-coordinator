@@ -1,6 +1,6 @@
 package com.stevebunting.rfxp.coordinator;
 
-class Intermod implements Comparable<Intermod> {
+class Intermod implements Comparable<Intermod>, FrequencyComponent {
     // INSTANCE VARIABLES
     enum Type {
         IM_2T3O("2T3O"),

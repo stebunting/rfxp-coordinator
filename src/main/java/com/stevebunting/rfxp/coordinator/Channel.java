@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-class Channel implements Comparable<Channel> {
+class Channel implements Comparable<Channel>, FrequencyComponent {
 
     // Enum for declaring validity of channel
     enum Validity {
@@ -127,7 +127,7 @@ class Channel implements Comparable<Channel> {
     }
 
     // Return frequency in kHz
-    final int getFreq() {
+    final public int getFreq() {
         return frequency;
     }
 
