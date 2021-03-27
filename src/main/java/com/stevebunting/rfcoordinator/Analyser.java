@@ -1,9 +1,7 @@
 package com.stevebunting.rfcoordinator;
 
 import org.jetbrains.annotations.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * The Analyser class stores lists of channels, intermods and conflicts
@@ -25,11 +23,15 @@ final class Analyser {
     // Number of invalid channels
     private int numInvalidChannels = 0;
     private int numChannelConflicts = 0;
-    private int num2t3oIMConflicts = 0;
-    private int num2t5oIMConflicts = 0;
-    private int num2t7oIMConflicts = 0;
-    private int num2t9oIMConflicts = 0;
-    private int num3t3oIMConflicts = 0;
+    final private Map<Intermod.Type, Integer> numIMConflicts = new HashMap<>();
+
+    Analyser() {
+        numIMConflicts.put(Intermod.Type.IM_2T3O, 0);
+        numIMConflicts.put(Intermod.Type.IM_2T5O, 0);
+        numIMConflicts.put(Intermod.Type.IM_2T7O, 0);
+        numIMConflicts.put(Intermod.Type.IM_2T9O, 0);
+        numIMConflicts.put(Intermod.Type.IM_3T3O, 0);
+    }
 
     /**
      * Method to add a new channel to the analysis
@@ -421,27 +423,8 @@ final class Analyser {
         if (conflict.getType() == Conflict.Type.CHANNEL_SPACING) {
             numChannelConflicts += incrementor;
         } else if (conflict.getType() == Conflict.Type.INTERMOD_SPACING) {
-            switch (conflict.getConflictIntermod().getType()) {
-                case IM_2T3O:
-                    num2t3oIMConflicts += incrementor;
-                    break;
-
-                case IM_2T5O:
-                    num2t5oIMConflicts += incrementor;
-                    break;
-
-                case IM_2T7O:
-                    num2t7oIMConflicts += incrementor;
-                    break;
-
-                case IM_2T9O:
-                    num2t9oIMConflicts += incrementor;
-                    break;
-
-                case IM_3T3O:
-                    num3t3oIMConflicts += incrementor;
-                    break;
-            }
+            Intermod.Type imType = conflict.getConflictIntermod().getType();
+            numIMConflicts.put(imType, numIMConflicts.get(imType) + incrementor);
         }
     }
 
@@ -515,23 +498,10 @@ final class Analyser {
         return numChannelConflicts;
     }
 
-    final int getNum2t3oIMConflicts() {
-        return num2t3oIMConflicts;
-    }
-
-    final int getNum2t5oIMConflicts() {
-        return num2t5oIMConflicts;
-    }
-
-    final int getNum2t7oIMConflicts() {
-        return num2t7oIMConflicts;
-    }
-
-    final int getNum2t9oIMConflicts() {
-        return num2t9oIMConflicts;
-    }
-
-    final int getNum3t3oIMConflicts() {
-        return num3t3oIMConflicts;
+    final int getNumIMConflicts(@NotNull final Intermod.Type type) {
+        if (type == null) {
+            return 0;
+        }
+        return numIMConflicts.get(type);
     }
 }

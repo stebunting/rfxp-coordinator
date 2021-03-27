@@ -51,11 +51,11 @@ class AnalyserTests {
         assertEquals(11, analyser.getValidChannels());
         assertEquals(0, analyser.getConflictList().size());
         assertEquals(0, analyser.getNumChannelConflicts());
-        assertEquals(0, analyser.getNum2t3oIMConflicts());
-        assertEquals(0, analyser.getNum2t5oIMConflicts());
-        assertEquals(0, analyser.getNum2t7oIMConflicts());
-        assertEquals(0, analyser.getNum2t9oIMConflicts());
-        assertEquals(0, analyser.getNum3t3oIMConflicts());
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
     }
 
     @DisplayName("generate invalid analysis")
@@ -77,11 +77,11 @@ class AnalyserTests {
         assertEquals(0, analyser.getValidChannels());
         assertEquals(112, analyser.getConflictList().size());
         assertEquals(6, analyser.getNumChannelConflicts());
-        assertEquals(18, analyser.getNum2t3oIMConflicts());
-        assertEquals(20, analyser.getNum2t5oIMConflicts());
-        assertEquals(0, analyser.getNum2t7oIMConflicts());
-        assertEquals(0, analyser.getNum2t9oIMConflicts());
-        assertEquals(68, analyser.getNum3t3oIMConflicts());
+        assertEquals(18, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+        assertEquals(20, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+        assertEquals(68, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
     }
 
     @DisplayName("remove channels cleanly")
@@ -103,11 +103,11 @@ class AnalyserTests {
         assertEquals(0, analyser.getValidChannels());
         assertEquals(61, analyser.getConflictList().size());
         assertEquals(4, analyser.getNumChannelConflicts());
-        assertEquals(10, analyser.getNum2t3oIMConflicts());
-        assertEquals(3, analyser.getNum2t5oIMConflicts());
-        assertEquals(0, analyser.getNum2t7oIMConflicts());
-        assertEquals(0, analyser.getNum2t9oIMConflicts());
-        assertEquals(44, analyser.getNum3t3oIMConflicts());
+        assertEquals(10, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+        assertEquals(3, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+        assertEquals(44, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
 
         int[] frequenciesToRemove = new int[]{
                 769100, 765800, 768275, 763975, 767975, 770575,
@@ -131,11 +131,11 @@ class AnalyserTests {
                     assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
                     assertEquals(conflicts[i], analyser.getConflictList().size());
                     assertEquals(channelConflicts[i], analyser.getNumChannelConflicts());
-                    assertEquals(im2t3oConflicts[i], analyser.getNum2t3oIMConflicts());
-                    assertEquals(im2t5oConflicts[i], analyser.getNum2t5oIMConflicts());
-                    assertEquals(im2t7oConflicts[i], analyser.getNum2t7oIMConflicts());
-                    assertEquals(im2t9oConflicts[i], analyser.getNum2t9oIMConflicts());
-                    assertEquals(im3t3oConflicts[i], analyser.getNum3t3oIMConflicts());
+                    assertEquals(im2t3oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+                    assertEquals(im2t5oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+                    assertEquals(im2t7oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+                    assertEquals(im2t9oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+                    assertEquals(im3t3oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
                     TestHelpers.assertIsSorted(analyser.getIntermodList());
                     break;
                 }
@@ -158,11 +158,11 @@ class AnalyserTests {
             assertEquals(i + 1, analyser.getValidChannels());
             assertEquals(0, analyser.getConflictList().size());
             assertEquals(0, analyser.getNumChannelConflicts());
-            assertEquals(0, analyser.getNum2t3oIMConflicts());
-            assertEquals(0, analyser.getNum2t5oIMConflicts());
-            assertEquals(0, analyser.getNum2t7oIMConflicts());
-            assertEquals(0, analyser.getNum2t9oIMConflicts());
-            assertEquals(0, analyser.getNum3t3oIMConflicts());
+            assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+            assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+            assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+            assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+            assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
         }
 
         List<Double> newFrequencies = new ArrayList<>(Arrays.asList(
@@ -185,11 +185,11 @@ class AnalyserTests {
         assertEquals(frequencies.size(), analyser.getChannelList().size());
         assertEquals(11, analyser.getConflictList().size());
         assertEquals(4, analyser.getNumChannelConflicts());
-        assertEquals(2, analyser.getNum2t3oIMConflicts());
-        assertEquals(1, analyser.getNum2t5oIMConflicts());
-        assertEquals(0, analyser.getNum2t7oIMConflicts());
-        assertEquals(0, analyser.getNum2t9oIMConflicts());
-        assertEquals(4, analyser.getNum3t3oIMConflicts());
+        assertEquals(2, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+        assertEquals(1, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+        assertEquals(4, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
     }
 
     @DisplayName("generate analysis with different equipment types")
@@ -219,11 +219,11 @@ class AnalyserTests {
         assertEquals(0, analyser.getValidChannels());
         assertEquals(200, analyser.getConflictList().size());
         assertEquals(6, analyser.getNumChannelConflicts());
-        assertEquals(21, analyser.getNum2t3oIMConflicts());
-        assertEquals(5, analyser.getNum2t5oIMConflicts());
-        assertEquals(0, analyser.getNum2t7oIMConflicts());
-        assertEquals(0, analyser.getNum2t9oIMConflicts());
-        assertEquals(168, analyser.getNum3t3oIMConflicts());
+        assertEquals(21, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+        assertEquals(5, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+        assertEquals(0, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+        assertEquals(168, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
     }
 
     @DisplayName("generate analysis with checking")
@@ -259,10 +259,10 @@ class AnalyserTests {
         assertEquals(frequencies.size(), analyser.getChannelList().size());
         assertEquals(540, analyser.getConflictList().size());
         assertEquals(0, analyser.getNumChannelConflicts());
-        assertEquals(68, analyser.getNum2t3oIMConflicts());
-        assertEquals(24, analyser.getNum2t5oIMConflicts());
-        assertEquals(10, analyser.getNum2t7oIMConflicts());
-        assertEquals(2, analyser.getNum2t9oIMConflicts());
-        assertEquals(436, analyser.getNum3t3oIMConflicts());
+        assertEquals(68, analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
+        assertEquals(24, analyser.getNumIMConflicts(Intermod.Type.IM_2T5O));
+        assertEquals(10, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
+        assertEquals(2, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
+        assertEquals(436, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
     }
 }
