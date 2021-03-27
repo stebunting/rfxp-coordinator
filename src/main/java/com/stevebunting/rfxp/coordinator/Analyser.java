@@ -527,6 +527,14 @@ final class Analyser {
         return numChannelConflicts;
     }
 
+    final int getNumIMConflicts() {
+        return numIMConflicts.get(Intermod.Type.IM_2T3O)
+                + numIMConflicts.get(Intermod.Type.IM_2T5O)
+                + numIMConflicts.get(Intermod.Type.IM_2T7O)
+                + numIMConflicts.get(Intermod.Type.IM_2T9O)
+                + numIMConflicts.get(Intermod.Type.IM_3T3O);
+    }
+
     final int getNumIMConflicts(@NotNull final Intermod.Type type) {
         if (type == null) {
             return 0;

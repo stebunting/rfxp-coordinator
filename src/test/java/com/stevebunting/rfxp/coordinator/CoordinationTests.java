@@ -386,6 +386,7 @@ class CoordinationTests {
 
             assertEquals(36, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(36, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
@@ -398,6 +399,7 @@ class CoordinationTests {
 
             assertEquals(32, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(32, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
@@ -408,6 +410,7 @@ class CoordinationTests {
             coordination.editChannel(947.325);
             assertEquals(24, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(24, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
@@ -418,6 +421,7 @@ class CoordinationTests {
 
             assertEquals(32, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(32, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
@@ -428,6 +432,7 @@ class CoordinationTests {
             coordination.editChannel(equipmentProfiles.get("Sennheiser", "2000 IEM"));
             assertEquals(37, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(37, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
