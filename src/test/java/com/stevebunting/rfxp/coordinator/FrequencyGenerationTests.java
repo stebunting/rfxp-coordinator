@@ -22,7 +22,10 @@ public class FrequencyGenerationTests {
     final void testGenerate2Frequencies() throws InvalidFrequencyException {
         coordination.addNewChannels(2, equipment, false);
         assertEquals(2, coordination.getChannels().length);
+        assertEquals(2, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
+        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
     @DisplayName("generates frequency list of 3")
@@ -30,7 +33,10 @@ public class FrequencyGenerationTests {
     final void testGenerate3Frequencies() throws InvalidFrequencyException {
         coordination.addNewChannels(3, equipment, false);
         assertEquals(3, coordination.getChannels().length);
+        assertEquals(3, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
+        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
     @DisplayName("generates frequency list of 4")
@@ -38,7 +44,10 @@ public class FrequencyGenerationTests {
     final void testGenerate4Frequencies() throws InvalidFrequencyException {
         coordination.addNewChannels(4, equipment, false);
         assertEquals(4, coordination.getChannels().length);
+        assertEquals(4, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
+        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
     @DisplayName("generates frequency list of 6")
@@ -46,7 +55,10 @@ public class FrequencyGenerationTests {
     final void testGenerate6Frequencies() throws InvalidFrequencyException {
         coordination.addNewChannels(6, equipment, false);
         assertEquals(6, coordination.getChannels().length);
+        assertEquals(6, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
+        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
     @DisplayName("generates frequency list of 10")
@@ -54,7 +66,10 @@ public class FrequencyGenerationTests {
     final void testGenerate10Frequencies() throws InvalidFrequencyException {
         coordination.addNewChannels(10, equipment, false);
         assertEquals(10, coordination.getChannels().length);
+        assertEquals(10, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
+        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
     @DisplayName("generates frequency list of 21 in 606-648MHz")
@@ -69,6 +84,9 @@ public class FrequencyGenerationTests {
         System.out.println(Arrays.toString(channels));
         System.out.println(String.format("FREQUENCIES FOUND: %d", coordination.getChannels().length));
         assertEquals(21, coordination.getChannels().length);
+        assertEquals(21, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
+        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
+        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 }

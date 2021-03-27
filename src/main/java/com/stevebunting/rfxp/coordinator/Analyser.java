@@ -552,8 +552,6 @@ final class Analyser {
         long startTime = System.nanoTime();
         HashMap<Integer, Integer> possibleFrequencies = new HashMap<>();
 
-        // NEED TO TRACK CONFLICT COUNTER AND RESET
-
         int counter = equipment.getRange().getLo();
         while (counter <= equipment.getRange().getHi()) {
             possibleFrequencies.put(counter, counter);
