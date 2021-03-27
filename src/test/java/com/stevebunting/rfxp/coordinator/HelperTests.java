@@ -1,4 +1,4 @@
-package com.stevebunting.rfcoordinator;
+package com.stevebunting.rfxp.coordinator;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;

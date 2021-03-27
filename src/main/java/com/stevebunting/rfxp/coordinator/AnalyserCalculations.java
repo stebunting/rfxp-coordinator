@@ -1,4 +1,4 @@
-package com.stevebunting.rfcoordinator;
+package com.stevebunting.rfxp.coordinator;
 
 /**
  * The AnalyserCalculations class defines which intermodulations are required

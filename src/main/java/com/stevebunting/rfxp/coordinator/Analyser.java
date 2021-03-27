@@ -1,4 +1,4 @@
-package com.stevebunting.rfcoordinator;
+package com.stevebunting.rfxp.coordinator;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.*;

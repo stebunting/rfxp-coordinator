@@ -1,4 +1,4 @@
-package com.stevebunting.rfcoordinator;
+package com.stevebunting.rfxp.coordinator;
 
 class Intermod implements Comparable<Intermod> {
     // INSTANCE VARIABLES

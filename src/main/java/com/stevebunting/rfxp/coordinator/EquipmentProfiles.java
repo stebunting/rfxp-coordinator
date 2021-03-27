@@ -1,4 +1,4 @@
-package com.stevebunting.rfcoordinator;
+package com.stevebunting.rfxp.coordinator;
 
 import java.io.File;
 import com.fasterxml.jackson.databind.ObjectMapper;

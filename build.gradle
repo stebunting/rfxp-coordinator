@@ -16,10 +16,11 @@ dependencies {
     // JUnit test framework
     def junitVersion = "5.7.1"
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 
     // Mockito
-    def mockitoVersion = "3.8.14"
-    testCompile "org.mockito:mockito-core:${mockitoVersion}"
+    // def mockitoVersion = "3.8.14"
+    // testCompile "org.mockito:mockito-core:${mockitoVersion}"
 
     // Jackson JSON Parsing
     def jacksonVersion = "2.12.2"

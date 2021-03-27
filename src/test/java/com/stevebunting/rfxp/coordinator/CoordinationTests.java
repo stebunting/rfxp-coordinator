@@ -1,10 +1,9 @@
-package com.stevebunting.rfcoordinator;
+package com.stevebunting.rfxp.coordinator;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 @DisplayName("Coordination Class...")
 class CoordinationTests {
