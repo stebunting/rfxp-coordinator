@@ -18,7 +18,7 @@ class EquipmentTests {
 
         @BeforeEach
         void setUp() {
-            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50);
         }
 
         @DisplayName("ensure validity of frequency without range")
@@ -50,16 +50,16 @@ class EquipmentTests {
         final void testEquipmentEquality() {
             assertEquals(equipment, equipment);
             assertNotEquals(equipment, null);
-            assertEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 25, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 300, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 0, 100, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 0, 90, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 0, 0, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 1000, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 1000, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 0));
+            assertEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 25, 300, 200, 190, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 300, 200, 190, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 0, 200, 190, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 0, 190, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 0, 100, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 0, 75, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 0, 50));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 0));
         }
 
         @DisplayName("get human readable description of equipment without range")
@@ -144,37 +144,37 @@ class EquipmentTests {
         @DisplayName("get minimum channel-to-2T3O IM spacing (in kHz)")
         @Test
         final void testGet2t3oSpacing() {
-            assertEquals(100, equipment.get2t3oSpacing());
+            assertEquals(200, equipment.getSpacing(Intermod.Type.IM_2T3O));
         }
 
         @DisplayName("get minimum channel-to-2T5O IM spacing (in kHz)")
         @Test
         final void testGet2t5oSpacing() {
-            assertEquals(90, equipment.get2t5oSpacing());
+            assertEquals(190, equipment.getSpacing(Intermod.Type.IM_2T5O));
         }
 
         @DisplayName("get minimum channel-to-2T7O IM spacing (in kHz)")
         @Test
         final void testGet2t7oSpacing() {
-            assertEquals(0, equipment.get2t7oSpacing());
+            assertEquals(100, equipment.getSpacing(Intermod.Type.IM_2T7O));
         }
 
         @DisplayName("get minimum channel-to-2T9O IM spacing (in kHz)")
         @Test
         final void testGet2t9oSpacing() {
-            assertEquals(0, equipment.get2t9oSpacing());
+            assertEquals(75, equipment.getSpacing(Intermod.Type.IM_2T9O));
         }
 
         @DisplayName("get minimum channel-to-3T3O IM spacing (in kHz)")
         @Test
         final void testGet3t3oSpacing() {
-            assertEquals(50, equipment.get3t3oSpacing());
+            assertEquals(50, equipment.getSpacing(Intermod.Type.IM_3T3O));
         }
 
         @DisplayName("get maximum channel-to-IM spacing (in kHz)")
         @Test
         final void testMaxImSpacing() {
-            assertEquals(100, equipment.getMaxImSpacing());
+            assertEquals(200, equipment.getMaxImSpacing());
 
             equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 150, 0, 0, 50);
             assertEquals(150, equipment.getMaxImSpacing());

@@ -83,11 +83,11 @@ public class Equipment {
                 && this.getModel().equals(that.getModel())
                 && this.getTuningAccuracy() == that.getTuningAccuracy()
                 && this.getChannelSpacing() == that.getChannelSpacing()
-                && this.get2t3oSpacing() == that.get2t3oSpacing()
-                && this.get2t5oSpacing() == that.get2t5oSpacing()
-                && this.get2t7oSpacing() == that.get2t7oSpacing()
-                && this.get2t9oSpacing() == that.get2t9oSpacing()
-                && this.get3t3oSpacing() == that.get3t3oSpacing());
+                && this.getSpacing(Intermod.Type.IM_2T3O) == that.getSpacing(Intermod.Type.IM_2T3O)
+                && this.getSpacing(Intermod.Type.IM_2T5O) == that.getSpacing(Intermod.Type.IM_2T5O)
+                && this.getSpacing(Intermod.Type.IM_2T7O) == that.getSpacing(Intermod.Type.IM_2T7O)
+                && this.getSpacing(Intermod.Type.IM_2T9O) == that.getSpacing(Intermod.Type.IM_2T9O)
+                && this.getSpacing(Intermod.Type.IM_3T3O) == that.getSpacing(Intermod.Type.IM_3T3O));
     }
 
     // Print object
@@ -127,27 +127,29 @@ public class Equipment {
         return spacingChannel;
     }
 
-    final int get2t3oSpacing() {
-        return spacing2t3o;
-    }
-
-    final int get2t5oSpacing() {
-        return spacing2t5o;
-    }
-
-    final int get2t7oSpacing() {
-        return spacing2t7o;
-    }
-
-    final int get2t9oSpacing() {
-        return spacing2t9o;
-    }
-
-    final int get3t3oSpacing() {
-        return spacing3t3o;
-    }
-
     final int getMaxImSpacing() {
         return maxImSpacing;
+    }
+
+    final int getSpacing(@NotNull final Intermod.Type type) {
+        switch (type) {
+            case IM_2T3O:
+                return spacing2t3o;
+
+            case IM_2T5O:
+                return spacing2t5o;
+
+            case IM_2T7O:
+                return spacing2t7o;
+
+            case IM_2T9O:
+                return spacing2t9o;
+
+            case IM_3T3O:
+                return spacing3t3o;
+
+            default:
+                return 0;
+        }
     }
 }

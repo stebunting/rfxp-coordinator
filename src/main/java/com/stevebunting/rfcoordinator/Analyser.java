@@ -279,32 +279,7 @@ final class Analyser {
             return;
         }
 
-        final Integer maxSpacing;
-        switch (intermod.getType()) {
-            case IM_2T3O:
-                maxSpacing = channel.getEquipment().get2t3oSpacing();
-                break;
-
-            case IM_2T5O:
-                maxSpacing = channel.getEquipment().get2t5oSpacing();
-                break;
-
-            case IM_2T7O:
-                maxSpacing = channel.getEquipment().get2t7oSpacing();
-                break;
-
-            case IM_2T9O:
-                maxSpacing = channel.getEquipment().get2t9oSpacing();
-                break;
-
-            case IM_3T3O:
-                maxSpacing = channel.getEquipment().get3t3oSpacing();
-                break;
-
-            default:
-                maxSpacing = null;
-                break;
-        }
+        final Integer maxSpacing = channel.getEquipment().getSpacing(intermod.getType());
 
         final int difference = Math.abs(channel.getFreq() - intermod.getFreq());
         if (maxSpacing != null && maxSpacing > difference) {
