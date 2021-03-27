@@ -25,12 +25,40 @@ final class Analyser {
     private int numChannelConflicts = 0;
     final private Map<Intermod.Type, Integer> numIMConflicts = new HashMap<>();
 
+    // Settings
+    boolean randomSelection = true;
+
+    // Metrics
+    enum Metrics {
+        ITERATION_COUNT,
+        FIND_RANDOM_NUMBER_TIME,
+        BUILD_CHANNEL_TIME,
+        CALCULATE_INTERMODS_TIME,
+        CALCULATE_CONFLICTS_TIME,
+        MERGE_INTERMODS_TIME,
+        COPY_MAP_TIME,
+        RESTORE_ANALYSIS_TIME,
+        TOTAL_TIME
+    }
+
+    final private Map<Metrics, Long> metrics = new HashMap<>();
+
     Analyser() {
         numIMConflicts.put(Intermod.Type.IM_2T3O, 0);
         numIMConflicts.put(Intermod.Type.IM_2T5O, 0);
         numIMConflicts.put(Intermod.Type.IM_2T7O, 0);
         numIMConflicts.put(Intermod.Type.IM_2T9O, 0);
         numIMConflicts.put(Intermod.Type.IM_3T3O, 0);
+
+        metrics.put(Metrics.ITERATION_COUNT, 0L);
+        metrics.put(Metrics.FIND_RANDOM_NUMBER_TIME, 0L);
+        metrics.put(Metrics.BUILD_CHANNEL_TIME, 0L);
+        metrics.put(Metrics.CALCULATE_INTERMODS_TIME, 0L);
+        metrics.put(Metrics.CALCULATE_CONFLICTS_TIME, 0L);
+        metrics.put(Metrics.MERGE_INTERMODS_TIME, 0L);
+        metrics.put(Metrics.COPY_MAP_TIME, 0L);
+        metrics.put(Metrics.RESTORE_ANALYSIS_TIME, 0L);
+        metrics.put(Metrics.TOTAL_TIME, 0L);
     }
 
     /**
@@ -133,6 +161,7 @@ final class Analyser {
      * of channels.
      *
      * @param newChannel channel to generate intermods against
+     *                  conflicts found
      * @return sorted list of intermodulations generated between newChannel and
      * all other channels in channels list
      */
@@ -173,7 +202,7 @@ final class Analyser {
                 }
             }
         }
-        Collections.sort(newIntermods);
+        newIntermods.sort(null);
         return newIntermods;
     }
 
@@ -503,5 +532,235 @@ final class Analyser {
             return 0;
         }
         return numIMConflicts.get(type);
+    }
+
+    final List<Integer> addNewChannels(
+            final int num,
+            final Equipment equipment,
+            final boolean printReport
+    ) throws InvalidFrequencyException {
+        // Generate and populate list of possible frequencies
+        resetMetrics();
+        long startTime = System.nanoTime();
+        HashMap<Integer, Integer> possibleFrequencies = new HashMap<>();
+
+        // NEED TO TRACK CONFLICT COUNTER AND RESET
+
+        int counter = equipment.getRange().getLo();
+        while (counter <= equipment.getRange().getHi()) {
+            possibleFrequencies.put(counter, counter);
+            counter += equipment.getTuningAccuracy();
+        }
+
+        List<Integer> newFrequencies = new ArrayList<>();
+        newChannel(num, equipment, possibleFrequencies, newFrequencies);
+        metrics.put(Metrics.TOTAL_TIME, System.nanoTime() - startTime);
+
+        if (printReport) {
+            printMetrics();
+        }
+
+        return newFrequencies;
+    }
+
+    // Copy an array of possible frequencies, removing unusable frequencies
+    private HashMap<Integer, Integer> clonePossibleFrequencies(
+            @NotNull final HashMap<Integer, Integer> possibleFrequencies,
+            final int frequency,
+            @NotNull final Equipment equipment,
+            @NotNull final List<Intermod> intermods
+    ) {
+        if (possibleFrequencies == null) {
+            return null;
+        }
+        if (equipment == null) {
+            return new HashMap<>(possibleFrequencies);
+        }
+
+        int rangeLo = frequency - equipment.getChannelSpacing();
+        int rangeHi = frequency + equipment.getChannelSpacing();
+        final HashMap<Integer, Integer> newMap = new HashMap<>(possibleFrequencies.size());
+
+        // Create new map with new frequencies removed
+        for (Integer freq : possibleFrequencies.keySet()) {
+            if (freq <= rangeLo || freq >= rangeHi) {
+                newMap.put(freq, freq);
+            }
+        }
+
+        if (intermods == null) {
+            return newMap;
+        }
+
+        // Remove intermods
+        for (Intermod im : intermods) {
+            final int spacing = equipment.getSpacing(im.getType());
+
+            rangeLo = im.getFreq() - spacing;
+            rangeHi = im.getFreq() + spacing;
+            int startFreq = equipment.getTuningAccuracy() * (int) Math.ceil((1 + rangeLo) / (double) equipment.getTuningAccuracy());
+
+            // This can be refined, very rough
+            if (rangeHi < equipment.getRange().getLo()) {
+                continue;
+            }
+
+            for (int i = startFreq; i < rangeHi; i += equipment.getTuningAccuracy()) {
+                newMap.remove(i);
+            }
+        }
+
+        return newMap;
+    }
+
+    final boolean newChannel(
+            final int num,
+            final Equipment equipment,
+            final HashMap<Integer, Integer> possibleFrequencies,
+            final List<Integer> newFrequencies
+    ) throws InvalidFrequencyException {
+        if (num == 0) {
+            return true;
+        }
+        Random rand = new Random();
+        List<Conflict> newConflicts = new ArrayList<>();
+        long startTime;
+        Channel testChannel;
+
+        while (possibleFrequencies.size() > 0) {
+            // Increment iterations
+            metrics.put(Metrics.ITERATION_COUNT, metrics.get(Metrics.ITERATION_COUNT) + 1);
+
+            // Pick a frequency from the list of possible frequencies
+            startTime = System.nanoTime();
+            Set<Integer> keySet = possibleFrequencies.keySet();
+            int newFrequency = randomSelection
+                    ? (int) keySet.toArray()[rand.nextInt(possibleFrequencies.size())]
+                    : Collections.min(keySet);
+            metrics.put(Metrics.FIND_RANDOM_NUMBER_TIME, metrics.get(Metrics.FIND_RANDOM_NUMBER_TIME) + System.nanoTime() - startTime);
+
+            // Build Test Channel
+            startTime = System.nanoTime();
+            testChannel = new Channel(null, Channel.kHzToMHz(newFrequency), equipment);
+            metrics.put(Metrics.BUILD_CHANNEL_TIME, metrics.get(Metrics.BUILD_CHANNEL_TIME) + System.nanoTime() - startTime);
+
+            // Get intermods
+            startTime = System.nanoTime();
+            List<Intermod> newIntermods = calculateIntermods(testChannel);
+            newConflicts.clear();
+            getIMConflicts(channels, newIntermods, newConflicts, false);
+            metrics.put(Metrics.CALCULATE_INTERMODS_TIME, metrics.get(Metrics.CALCULATE_INTERMODS_TIME) + System.nanoTime() - startTime);
+
+            // Remove frequency from possible frequencies
+            possibleFrequencies.remove(newFrequency);
+
+            // If frequency is good, add channel to analysis and move onto next
+            if (newConflicts.size() == 0) {
+                // Add channel to analysis
+                startTime = System.nanoTime();
+                channels.add(testChannel);
+                final List<Intermod> backupIntermods = intermods;
+                intermods = mergeLists(intermods, newIntermods);
+                metrics.put(Metrics.MERGE_INTERMODS_TIME, metrics.get(Metrics.MERGE_INTERMODS_TIME) + System.nanoTime() - startTime);
+
+                // Update Possible Frequencies and iterate
+                startTime = System.nanoTime();
+                final HashMap<Integer, Integer> newMap = clonePossibleFrequencies(possibleFrequencies, newFrequency, equipment, newIntermods);
+                metrics.put(Metrics.COPY_MAP_TIME, metrics.get(Metrics.COPY_MAP_TIME) + System.nanoTime() - startTime);
+                boolean valid = newChannel(num - 1, equipment, newMap, newFrequencies);
+
+                // Restore analysis
+                startTime = System.nanoTime();
+                channels.remove(testChannel);
+                intermods = backupIntermods;
+                metrics.put(Metrics.RESTORE_ANALYSIS_TIME, metrics.get(Metrics.RESTORE_ANALYSIS_TIME) + System.nanoTime() - startTime);
+
+                if (valid) {
+                    newFrequencies.add(newFrequency);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private long nsToMs(@NotNull final Metrics metric) {
+        if (metric == null) {
+            return 0;
+        }
+        return metrics.get(metric) / 1000000;
+    }
+
+    private double percentage(@NotNull final Metrics metric, @NotNull final Metrics total) {
+        return 100 * metrics.get(metric) / (double) metrics.get(total);
+    }
+
+    private void printMetrics() {
+        String format = "│ \u001B[31m%24s\u001B[0m │ %5dms │ %6.1f%% │";
+        System.out.println("┌──────────────────────────┬───────────────────┐");
+        System.out.println(String.format("│ \u001B[31m%24s\u001B[0m │ %-17d │",
+                "ITERATION COUNT",
+                metrics.get(Metrics.ITERATION_COUNT)));
+        System.out.println(String.format("│ \u001B[31m%24s\u001B[0m │ %-17s │",
+                "TIME PER ITERATION",
+                String.format("%dµs", metrics.get(Metrics.TOTAL_TIME) / metrics.get(Metrics.ITERATION_COUNT) / 1000)));
+        System.out.println("├──────────────────────────┼─────────┬─────────┤");
+        System.out.println(String.format(
+                "│ \u001B[31m%24s\u001B[0m │ \u001B[31m%7s\u001B[0m │ \u001B[31m%7s\u001B[0m │",
+                "STAGE", "TIME", "PERCENT"));
+        System.out.println("├──────────────────────────┼─────────┼─────────┤");
+        System.out.println(String.format(format,
+                "FINDING RANDOM NUMBERS",
+                nsToMs(Metrics.FIND_RANDOM_NUMBER_TIME),
+                percentage(Metrics.FIND_RANDOM_NUMBER_TIME, Metrics.TOTAL_TIME)));
+        System.out.println(String.format(format,
+                "CONSTRUCTING CHANNEL",
+                nsToMs(Metrics.BUILD_CHANNEL_TIME),
+                percentage(Metrics.BUILD_CHANNEL_TIME, Metrics.TOTAL_TIME)));
+        System.out.println(String.format(format,
+                "CALCULATING INTERMODS",
+                nsToMs(Metrics.CALCULATE_INTERMODS_TIME),
+                percentage(Metrics.CALCULATE_INTERMODS_TIME, Metrics.TOTAL_TIME)));
+        System.out.println(String.format(format,
+                "CALCULATING CONFLICTS",
+                nsToMs(Metrics.CALCULATE_CONFLICTS_TIME),
+                percentage(Metrics.CALCULATE_CONFLICTS_TIME, Metrics.TOTAL_TIME)));
+        System.out.println(String.format(format,
+                "MERGING INTERMODS",
+                nsToMs(Metrics.MERGE_INTERMODS_TIME),
+                percentage(Metrics.MERGE_INTERMODS_TIME, Metrics.TOTAL_TIME)));
+        System.out.println(String.format(format,
+                "COPYING MAP",
+                nsToMs(Metrics.COPY_MAP_TIME),
+                percentage(Metrics.COPY_MAP_TIME, Metrics.TOTAL_TIME)));
+        System.out.println(String.format(format,
+                "RESTORING ANALYSIS",
+                nsToMs(Metrics.RESTORE_ANALYSIS_TIME),
+                percentage(Metrics.RESTORE_ANALYSIS_TIME, Metrics.TOTAL_TIME)));
+        System.out.println("├──────────────────────────┼─────────┼─────────┤");
+        System.out.println(String.format(format,
+                "TOTAL",
+                metrics.get(Metrics.TOTAL_TIME) / 1000000,
+                100 * (metrics.get(Metrics.FIND_RANDOM_NUMBER_TIME)
+                        + metrics.get(Metrics.BUILD_CHANNEL_TIME)
+                        + metrics.get(Metrics.CALCULATE_INTERMODS_TIME)
+                        + metrics.get(Metrics.CALCULATE_CONFLICTS_TIME)
+                        + metrics.get(Metrics.MERGE_INTERMODS_TIME)
+                        + metrics.get(Metrics.COPY_MAP_TIME)
+                        + metrics.get(Metrics.RESTORE_ANALYSIS_TIME))
+                        / (double) metrics.get(Metrics.TOTAL_TIME)));
+        System.out.println("└──────────────────────────┴─────────┴─────────┘");
+    }
+
+    private void resetMetrics() {
+        metrics.put(Metrics.ITERATION_COUNT, 0L);
+        metrics.put(Metrics.FIND_RANDOM_NUMBER_TIME, 0L);
+        metrics.put(Metrics.BUILD_CHANNEL_TIME, 0L);
+        metrics.put(Metrics.CALCULATE_INTERMODS_TIME, 0L);
+        metrics.put(Metrics.CALCULATE_CONFLICTS_TIME, 0L);
+        metrics.put(Metrics.MERGE_INTERMODS_TIME, 0L);
+        metrics.put(Metrics.COPY_MAP_TIME, 0L);
+        metrics.put(Metrics.RESTORE_ANALYSIS_TIME, 0L);
+        metrics.put(Metrics.TOTAL_TIME, 0L);
     }
 }

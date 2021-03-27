@@ -3,6 +3,7 @@ package com.stevebunting.rfcoordinator;
 import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Coordination is the main interaction point. It offers methods to add,
@@ -14,7 +15,7 @@ final class Coordination {
     private int idCounter = 0;
 
     // ArrayList to hold list of channels with id key
-    final private ArrayList<Channel> channels = new ArrayList<>();
+    final private List<Channel> channels = new ArrayList<>();
 
     // Analyser class
     final private Analyser analyser = new Analyser();
@@ -367,5 +368,18 @@ final class Coordination {
 
     final Analyser getAnalyser() {
         return analyser;
+    }
+
+    final void addNewChannels(
+            final int num,
+            @NotNull final Equipment equipment,
+            final boolean printReport
+    ) throws InvalidFrequencyException {
+        if (equipment == null) {
+            return;
+        }
+        for (Integer freq : analyser.addNewChannels(num, equipment, printReport)) {
+            addChannel(Channel.kHzToMHz(freq), equipment);
+        }
     }
 }
