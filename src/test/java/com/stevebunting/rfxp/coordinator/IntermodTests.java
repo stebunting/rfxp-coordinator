@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import java.util.Locale;
 
 @DisplayName("Intermod Class...")
 class IntermodTests {
@@ -16,6 +17,8 @@ class IntermodTests {
 
     @BeforeEach
     void setUp() throws Exception {
+        Locale.setDefault(new Locale("en", "GB"));
+
         channel1 = new Channel(0, 606.000, equipment);
         channel2 = new Channel(1, 606.300, equipment);
         channel3 = new Channel(2, 606.700, equipment);

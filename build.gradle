@@ -5,13 +5,15 @@ plugins {
 group 'com.stevebunting'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'jacoco'
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     def annotationsVersion = "20.1.0"
-    compile "org.jetbrains:annotations:${annotationsVersion}"
+    compileOnly "org.jetbrains:annotations:${annotationsVersion}"
 
     // JUnit test framework
     def junitVersion = "5.7.1"
@@ -27,6 +29,13 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
 }
 
 test {

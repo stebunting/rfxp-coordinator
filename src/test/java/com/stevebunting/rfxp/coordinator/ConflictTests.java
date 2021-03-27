@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import java.util.Locale;
 
 @DisplayName("Conflict Class...")
 class ConflictTests {
@@ -21,6 +22,8 @@ class ConflictTests {
 
         @BeforeEach
         void setUp() throws InvalidFrequencyException {
+            Locale.setDefault(new Locale("en", "GB"));
+
             channel1 = new Channel(0, 560.500, equipment);
             channel2 = new Channel(0, 560.700, equipment);
             conflict = new Conflict(channel1, channel2);

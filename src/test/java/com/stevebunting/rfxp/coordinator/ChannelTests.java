@@ -327,6 +327,8 @@ class ChannelTests {
         @DisplayName("get correctly formatted Channel string (XXX.XXX MHz)")
         @Test
         final void testChannelString() throws InvalidFrequencyException {
+            Locale.setDefault(new Locale("en", "GB"));
+
             Channel newChannel = new Channel(0, 500.550, equipment);
             assertEquals("500.550", newChannel.toString());
             assertEquals("500.550 MHz", newChannel.toStringWithMHz());
