@@ -173,7 +173,7 @@ class AnalyserTests {
                 578.250, 590.500, 563.100, 562.250, 575.250, 577.075,
                 581.000, 583.450, 577.825, 578.100, 592.250
         ));
-        int[] validChannels = new int[]{11, 11, 11, 11, 11, 4, 7, 11, 11, 6, 3};
+        int[] validChannels = new int[]{11, 11, 11, 11, 11, 11, 11, 11, 11, 6, 3};
 
         for (int i = 0; i < analyser.getChannelList().size(); i++) {
             Channel channelToUpdate = analyser.getChannelList().get(0);
@@ -275,5 +275,60 @@ class AnalyserTests {
         assertEquals(10, analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
         assertEquals(2, analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
         assertEquals(436, analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
+    }
+
+    @DisplayName("change 2T3O analysis with front end filter")
+    @Test
+    final void testChange2t3oAnalysisWithFrontEndFilter() throws InvalidFrequencyException {
+        Equipment equipment = new Equipment("RFXp", "Equipment", 5, 500, 200, 100, 50, 25, 100, Equipment.FrontEndType.TRACKING, 100000);
+
+        Channel ch1 = new Channel(null, 500, equipment);
+        Channel ch2 = new Channel(null, 600, equipment);
+        Channel ch3 = new Channel(null, 700, equipment);
+
+        analyser.addChannel(ch1);
+        analyser.addChannel(ch2);
+        analyser.addChannel(ch3);
+
+        assertEquals(0, analyser.getNumIMConflicts());
+        assertEquals(0, analyser.getConflictList().size());
+
+        Equipment newEdgeEquipment = new Equipment("RFXp", "Equipment", 5, 500, 200, 100, 50, 25, 100, Equipment.FrontEndType.TRACKING, 200000);
+        ch3.setEquipment(newEdgeEquipment);
+        analyser.updateChannel(ch3);
+
+        assertEquals(0, analyser.getNumIMConflicts());
+        assertEquals(0, analyser.getConflictList().size());
+
+        Equipment newBadEdgeEquipment = new Equipment("RFXp", "Equipment", 5, 500, 200, 100, 50, 25, 100, Equipment.FrontEndType.TRACKING, 200001);
+        ch3.setEquipment(newBadEdgeEquipment);
+        analyser.updateChannel(ch3);
+
+        assertEquals(1, analyser.getNumIMConflicts());
+        assertEquals(1, analyser.getConflictList().size());
+    }
+
+    @DisplayName("change 2T5O analysis with front end filter")
+    @Test
+    final void testChange2t5oAnalysisWithFrontEndFilter() throws InvalidFrequencyException {
+        Equipment equipment = new Equipment("RFXp", "Equipment", 5, 500, 200, 100, 50, 25, 100, Equipment.FrontEndType.TRACKING, 149000);
+
+        Channel ch1 = new Channel(null, 500, equipment);
+        Channel ch2 = new Channel(null, 550, equipment);
+        Channel ch3 = new Channel(null, 650, equipment);
+
+        analyser.addChannel(ch1);
+        analyser.addChannel(ch2);
+        analyser.addChannel(ch3);
+
+        assertEquals(0, analyser.getNumIMConflicts());
+        assertEquals(0, analyser.getConflictList().size());
+
+        Equipment newEdgeEquipment = new Equipment("RFXp", "Equipment", 5, 500, 200, 100, 50, 25, 100, Equipment.FrontEndType.TRACKING, 151000);
+        ch3.setEquipment(newEdgeEquipment);
+        analyser.updateChannel(ch3);
+
+        assertEquals(1, analyser.getNumIMConflicts());
+        assertEquals(1, analyser.getConflictList().size());
     }
 }

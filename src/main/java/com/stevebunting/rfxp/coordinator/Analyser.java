@@ -310,6 +310,17 @@ final class Analyser {
             return;
         }
 
+        // Check all intermod frequencies are within channel front-end filter
+        final int freq1Spacing = Math.abs(channel.getFreq() - intermod.getF1().getFreq());
+        final int freq2Spacing = Math.abs(channel.getFreq() - intermod.getF2().getFreq());
+        final int freq3Spacing = intermod.getType() == Intermod.Type.IM_3T3O
+                ? Math.abs(channel.getFreq() - intermod.getF3().getFreq())
+                : 0;
+        final int frontEndFilter = channel.getEquipment().getFrontEndFilter();
+        if (freq1Spacing >= frontEndFilter || freq2Spacing >= frontEndFilter || freq3Spacing >= frontEndFilter) {
+            return;
+        }
+
         final Integer maxSpacing = channel.getEquipment().getSpacing(intermod.getType());
 
         final int difference = Math.abs(channel.getFreq() - intermod.getFreq());

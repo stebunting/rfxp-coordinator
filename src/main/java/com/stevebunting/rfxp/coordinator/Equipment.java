@@ -45,7 +45,7 @@ public class Equipment {
               @JsonProperty("spacing2t7o") final int spacing2t7o,
               @JsonProperty("spacing2t9o") final int spacing2t9o,
               @JsonProperty("spacing3t3o") final int spacing3t3o,
-              @JsonProperty("frontEndFilterType") final FrontEndType frontEndFilterType,
+              @JsonProperty("frontEndFilterType") @NotNull final FrontEndType frontEndFilterType,
               @JsonProperty("frontEndFilter") final int frontEndFilter) {
         this(manufacturer, model, tuningAccuracy, spacingChannel, spacing2t3o, spacing2t5o, spacing2t7o, spacing2t9o, spacing3t3o, frontEndFilterType, frontEndFilter, null);
     }

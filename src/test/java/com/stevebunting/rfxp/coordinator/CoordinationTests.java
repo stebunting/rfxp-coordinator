@@ -156,7 +156,7 @@ class CoordinationTests {
 
         @DisplayName("test a duplicate channel")
         @Test
-        final void testTestDuplicateChannel() throws InvalidFrequencyException {
+        final void testDuplicateChannel() throws InvalidFrequencyException {
             double[] frequencies = new double[]{ 780.125, 780.550, 780.900, 781.125, 781.375, 781.775 };
             for (Double frequency : frequencies) {
                 coordination.addChannel(frequency, equipmentProfiles.get(0));
@@ -384,60 +384,60 @@ class CoordinationTests {
                 coordination.addChannel(frequency, equipmentProfiles.get(0));
             }
 
-            assertEquals(36, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-            assertEquals(36, coordination.getAnalyser().getNumIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T9O));
-            assertEquals(36, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
 
             coordination.startEditingChannel(0);
-            coordination.editChannel(829.375);
+            coordination.editChannel(576.4);
             coordination.stopEditingChannel();
 
-            assertEquals(32, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-            assertEquals(32, coordination.getAnalyser().getNumIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T9O));
-            assertEquals(32, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
 
             coordination.startEditingChannel(8);
-            coordination.editChannel(947.325);
-            assertEquals(24, coordination.getAnalyser().getConflictList().size());
+            coordination.editChannel(913.5);
+            assertEquals(2, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-            assertEquals(24, coordination.getAnalyser().getNumIMConflicts());
-            assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
+            assertEquals(2, coordination.getAnalyser().getNumIMConflicts());
+            assertEquals(2, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T9O));
-            assertEquals(24, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
             coordination.restoreEditingChannel();
             coordination.stopEditingChannel();
 
-            assertEquals(32, coordination.getAnalyser().getConflictList().size());
+            assertEquals(0, coordination.getAnalyser().getConflictList().size());
             assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-            assertEquals(32, coordination.getAnalyser().getNumIMConflicts());
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T9O));
-            assertEquals(32, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
 
-            coordination.startEditingChannel(9);
+            coordination.startEditingChannel(26);
             coordination.editChannel(equipmentProfiles.get("Sennheiser", "2000 IEM"));
-            assertEquals(37, coordination.getAnalyser().getConflictList().size());
-            assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-            assertEquals(37, coordination.getAnalyser().getNumIMConflicts());
+            assertEquals(1, coordination.getAnalyser().getConflictList().size());
+            assertEquals(1, coordination.getAnalyser().getNumChannelConflicts());
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T3O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T5O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T7O));
             assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_2T9O));
-            assertEquals(37, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
+            assertEquals(0, coordination.getAnalyser().getNumIMConflicts(Intermod.Type.IM_3T3O));
             coordination.stopEditingChannel();
         }
     }
