@@ -576,7 +576,7 @@ class CoordinationTests {
         @Nested
         class ChannelConflictAnalysisTests {
 
-            final Equipment equipment = new Equipment("Test", "Device", 1, 300, 100, 90, 0, 0, 50);
+            final Equipment equipment = new Equipment("Test", "Device", 1, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
 
             @BeforeEach
             void setUp() {
@@ -666,7 +666,7 @@ class CoordinationTests {
         @Nested
         class IMConflictAnalysisTests {
 
-            final Equipment equipment = new Equipment("Test", "Device", 25, 300, 100, 90, 0, 0, 50);
+            final Equipment equipment = new Equipment("Test", "Device", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
 
             @BeforeEach
             void setUp() {

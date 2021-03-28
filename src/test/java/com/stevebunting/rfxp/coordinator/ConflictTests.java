@@ -10,7 +10,7 @@ import java.util.Locale;
 @DisplayName("Conflict Class...")
 class ConflictTests {
 
-    final Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50);
+    final Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
 
     @DisplayName("constructs channel spacing conflicts that...")
     @Nested

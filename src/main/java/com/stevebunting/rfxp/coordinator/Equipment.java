@@ -25,6 +25,11 @@ public class Equipment {
     private final int spacing3t3o;
     private final int maxImSpacing;
 
+    // Front-end Filter Details (kHz)
+    enum FrontEndType { FIXED, TRACKING }
+    @NotNull private final Equipment.FrontEndType frontEndFilterType;
+    private final int frontEndFilter;
+
     // Tuning range
     private Range range;
 
@@ -39,8 +44,10 @@ public class Equipment {
               @JsonProperty("spacing2t5o") final int spacing2t5o,
               @JsonProperty("spacing2t7o") final int spacing2t7o,
               @JsonProperty("spacing2t9o") final int spacing2t9o,
-              @JsonProperty("spacing3t3o") final int spacing3t3o) {
-        this(manufacturer, model, tuningAccuracy, spacingChannel, spacing2t3o, spacing2t5o, spacing2t7o, spacing2t9o, spacing3t3o, null);
+              @JsonProperty("spacing3t3o") final int spacing3t3o,
+              @JsonProperty("frontEndFilterType") final FrontEndType frontEndFilterType,
+              @JsonProperty("frontEndFilter") final int frontEndFilter) {
+        this(manufacturer, model, tuningAccuracy, spacingChannel, spacing2t3o, spacing2t5o, spacing2t7o, spacing2t9o, spacing3t3o, frontEndFilterType, frontEndFilter, null);
     }
 
     Equipment(@NotNull final String manufacturer,
@@ -52,6 +59,8 @@ public class Equipment {
               final int spacing2t7o,
               final int spacing2t9o,
               final int spacing3t3o,
+              @NotNull final Equipment.FrontEndType frontEndFilterType,
+              final int frontEndFilter,
               final Range range) {
         this.manufacturer = manufacturer != null ? manufacturer : "";
         this.model = model != null ? model : "";
@@ -63,6 +72,8 @@ public class Equipment {
         this.spacing2t9o = spacing2t9o;
         this.spacing3t3o = spacing3t3o;
         this.maxImSpacing = Math.max(Math.max(Math.max(Math.max(spacing2t3o, spacing2t5o), spacing2t7o), spacing2t9o), spacing3t3o);
+        this.frontEndFilterType = frontEndFilterType;
+        this.frontEndFilter = frontEndFilter;
         this.range = range;
     }
 
@@ -87,7 +98,9 @@ public class Equipment {
                 && this.getSpacing(Intermod.Type.IM_2T5O) == that.getSpacing(Intermod.Type.IM_2T5O)
                 && this.getSpacing(Intermod.Type.IM_2T7O) == that.getSpacing(Intermod.Type.IM_2T7O)
                 && this.getSpacing(Intermod.Type.IM_2T9O) == that.getSpacing(Intermod.Type.IM_2T9O)
-                && this.getSpacing(Intermod.Type.IM_3T3O) == that.getSpacing(Intermod.Type.IM_3T3O));
+                && this.getSpacing(Intermod.Type.IM_3T3O) == that.getSpacing(Intermod.Type.IM_3T3O)
+                && this.getFrontEndFilterType() == that.getFrontEndFilterType()
+                && this.getFrontEndFilter() == that.getFrontEndFilter());
     }
 
     // Print object
@@ -153,5 +166,14 @@ public class Equipment {
             default:
                 return 0;
         }
+    }
+
+    @NotNull
+    final FrontEndType getFrontEndFilterType() {
+        return frontEndFilterType;
+    }
+
+    public int getFrontEndFilter() {
+        return frontEndFilter;
     }
 }

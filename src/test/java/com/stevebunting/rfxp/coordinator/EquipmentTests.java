@@ -18,7 +18,7 @@ class EquipmentTests {
 
         @BeforeEach
         void setUp() {
-            equipment = new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000);
         }
 
         @DisplayName("ensure validity of frequency without range")
@@ -32,7 +32,7 @@ class EquipmentTests {
         @Test
         final void testFrequencyValidityWithRange() {
             Range range = new Range(400000, 500000, "Generic");
-            Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50, range);
+            Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100, range);
             assert(equipment.isFrequencyValid(450025));
             assertFalse(equipment.isFrequencyValid(450026));
             assert(equipment.isFrequencyValid(400000));
@@ -50,16 +50,18 @@ class EquipmentTests {
         final void testEquipmentEquality() {
             assertEquals(equipment, equipment);
             assertNotEquals(equipment, null);
-            assertEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 25, 300, 200, 190, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 300, 200, 190, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 0, 200, 190, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 0, 190, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 0, 100, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 0, 75, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 0, 50));
-            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 0));
+            assertEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Not Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "Not PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 0, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 0, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 0, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 0, 100, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 0, 75, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 0, 50, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 0, Equipment.FrontEndType.TRACKING, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.FIXED, 100000));
+            assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 200000));
         }
 
         @DisplayName("get human readable description of equipment without range")
@@ -78,20 +80,20 @@ class EquipmentTests {
         @DisplayName("get human readable description of equipment (no model)")
         @Test
         final void testToStringNoModel() {
-            equipment = new Equipment("Shure", "", 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment("Shure", "", 0, 0, 0, 0, 0, 0, 0, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("Shure", equipment.toString());
 
-            equipment = new Equipment("Shure", null, 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment("Shure", null, 0, 0, 0, 0, 0, 0, 0, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("Shure", equipment.toString());
         }
 
         @DisplayName("get human readable description of equipment (no manufacturer)")
         @Test
         final void testToStringNoManufacturer() {
-            equipment = new Equipment("", "PSM900", 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment("", "PSM900", 0, 0, 0, 0, 0, 0, 0, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("PSM900", equipment.toString());
 
-            equipment = new Equipment(null, "PSM900", 0, 0, 0, 0, 0, 0, 0);
+            equipment = new Equipment(null, "PSM900", 0, 0, 0, 0, 0, 0, 0, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("PSM900", equipment.toString());
         }
 
@@ -112,7 +114,7 @@ class EquipmentTests {
         @DisplayName("get manufacturer name with blank/null manufacturer")
         @Test
         final void testGetNullManufacturer() {
-            Equipment nullManufacturerEquipment = new Equipment(null, "PSM900", 25, 300, 100, 90, 0, 0, 50);
+            Equipment nullManufacturerEquipment = new Equipment(null, "PSM900", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("", nullManufacturerEquipment.getManufacturer());
         }
 
@@ -125,7 +127,7 @@ class EquipmentTests {
         @DisplayName("get model name with blank/null model")
         @Test
         final void testGetNullModel() {
-            Equipment nullModelEquipment = new Equipment("Shure", null, 25, 300, 100, 90, 0, 0, 50);
+            Equipment nullModelEquipment = new Equipment("Shure", null, 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("", nullModelEquipment.getModel());
         }
 
@@ -176,17 +178,29 @@ class EquipmentTests {
         final void testMaxImSpacing() {
             assertEquals(200, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 150, 0, 0, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 150, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals(150, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 200, 0, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 200, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals(200, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 250, 50);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 250, 50, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals(250, equipment.getMaxImSpacing());
 
-            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 350);
+            equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 350, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals(350, equipment.getMaxImSpacing());
+        }
+
+        @DisplayName("get front end filter type")
+        @Test
+        final void testGetFrontEndFilterType() {
+            assertEquals(Equipment.FrontEndType.TRACKING, equipment.getFrontEndFilterType());
+        }
+
+        @DisplayName("get front end filter spacing (in kHz)")
+        @Test
+        final void testGetFrontEndFilter() {
+            assertEquals(100000, equipment.getFrontEndFilter());
         }
     }
 }

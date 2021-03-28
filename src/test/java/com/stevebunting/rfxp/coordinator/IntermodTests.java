@@ -13,7 +13,7 @@ class IntermodTests {
     Channel channel1;
     Channel channel2;
     Channel channel3;
-    final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50);
+    final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
 
     @BeforeEach
     void setUp() throws Exception {

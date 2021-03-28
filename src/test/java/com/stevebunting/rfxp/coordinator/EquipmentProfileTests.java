@@ -72,4 +72,11 @@ class EquipmentProfileTests {
         assertNull(equipmentProfiles.get(12));
         assertNotNull(equipmentProfiles.get(11));
     }
+
+    @DisplayName("correctly marshals front end filter type to enum")
+    @Test
+    final void testFrontEndFilterTypeMarshalledToEnum() {
+        assertNotEquals("FIXED", equipmentProfiles.get(2).getFrontEndFilterType());
+        assertEquals(Equipment.FrontEndType.FIXED, equipmentProfiles.get(2).getFrontEndFilterType());
+    }
 }

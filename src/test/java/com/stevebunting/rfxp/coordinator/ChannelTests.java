@@ -15,7 +15,7 @@ class ChannelTests {
     @Nested
     class ChannelConstructionTests {
 
-        final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50);
+        final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
 
         @DisplayName("generates object with integer id, frequency (in MHz) and equipment arguments")
         @Test
@@ -57,7 +57,7 @@ class ChannelTests {
 
         // Channel under test
         Channel channel;
-        final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50);
+        final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
 
         @BeforeEach
         void setUp() throws InvalidFrequencyException {
@@ -102,7 +102,7 @@ class ChannelTests {
         @DisplayName("set new equipment")
         @Test
         final void testSetEquipment() throws InvalidFrequencyException {
-            Equipment newEquipment = new Equipment("Shure", "PSM900", 50, 500, 200, 100, 50, 40, 80);
+            Equipment newEquipment = new Equipment("Shure", "PSM900", 50, 500, 200, 100, 50, 40, 80, Equipment.FrontEndType.TRACKING, 100000);
             channel.setEquipment(newEquipment);
             assertEquals(channel.getEquipment(), newEquipment);
             assertNotEquals(channel.getEquipment(), equipment);
@@ -125,7 +125,7 @@ class ChannelTests {
         @DisplayName("throw error when trying to set invalid equipment/frequency combination")
         @Test
         final void testSetInvalidEquipment() {
-            Equipment newEquipment = new Equipment("Shure", "PSM900", 1000, 500, 200, 100, 50, 40, 80);
+            Equipment newEquipment = new Equipment("Shure", "PSM900", 1000, 500, 200, 100, 50, 40, 80, Equipment.FrontEndType.TRACKING, 100000);
             assertThrows(InvalidFrequencyException.class,
                     () -> channel.setEquipment(newEquipment));
         }
@@ -274,7 +274,7 @@ class ChannelTests {
             comparisonChannel = new Channel(25, 503.450, equipment);
             assertNotEquals(channel, comparisonChannel);
 
-            comparisonChannel = new Channel(25, 500.450, new Equipment("Test", "Equipment", 1, 0, 0, 0, 0, 0, 0));
+            comparisonChannel = new Channel(25, 500.450, new Equipment("Test", "Equipment", 1, 0, 0, 0, 0, 0, 0, Equipment.FrontEndType.TRACKING, 100000));
             assertNotEquals(channel, comparisonChannel);
         }
 
@@ -365,7 +365,7 @@ class ChannelTests {
     @Nested
     public class ChannelSortingTests {
 
-        final Equipment equipment = new Equipment("Test", "Equipment", 25, 300, 100, 90, 0, 0, 50);
+        final Equipment equipment = new Equipment("Test", "Equipment", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
         ArrayList<Channel> channelList;
         Channel channel1;
         Channel channel2;

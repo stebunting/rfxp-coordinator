@@ -17,7 +17,7 @@ class FrequencyGenerationTests {
     final void setUp() {
         coordination = new Coordination();
         final Range range = new Range(606000, 614000, "GB");
-        equipment = new Equipment("Test", "Equipment", 25, 300, 100, 90, 0, 0, 50, range);
+        equipment = new Equipment("Test", "Equipment", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100, range);
     }
 
     @DisplayName("generates 2 valid frequencies")
