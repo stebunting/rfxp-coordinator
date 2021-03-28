@@ -113,9 +113,8 @@ final class Analyser {
      *
      * @param channel channel to update
      * @throws IllegalArgumentException on null channel passed
-     * @return boolean representing success or failure of operation
      */
-    final boolean updateChannel(@NotNull final Channel channel) throws IllegalArgumentException {
+    final void updateChannel(@NotNull final Channel channel) throws IllegalArgumentException {
         if (channel == null) {
             throw new IllegalArgumentException();
         }
@@ -124,7 +123,6 @@ final class Analyser {
         if (channelRemoved) {
             addChannel(channel);
         }
-        return channelRemoved;
     }
 
     /**
@@ -751,53 +749,53 @@ final class Analyser {
     }
 
     private void printMetrics() {
-        String format = "│ \u001B[31m%24s\u001B[0m │ %5dms │ %6.1f%% │";
+        String format = "│ \u001B[31m%24s\u001B[0m │ %5dms │ %6.1f%% │%n";
         System.out.println("┌──────────────────────────┬───────────────────┐");
-        System.out.println(String.format("│ \u001B[31m%24s\u001B[0m │ %-17d │",
+        System.out.printf("│ \u001B[31m%24s\u001B[0m │ %-17d │%n",
                 "ITERATION COUNT",
-                metrics.get(Metrics.ITERATION_COUNT)));
-        System.out.println(String.format("│ \u001B[31m%24s\u001B[0m │ %-17s │",
+                metrics.get(Metrics.ITERATION_COUNT));
+        System.out.printf("│ \u001B[31m%24s\u001B[0m │ %-17s │%n",
                 "TIME PER ITERATION",
-                String.format("%dµs", metrics.get(Metrics.TOTAL_TIME) / metrics.get(Metrics.ITERATION_COUNT) / 1000)));
+                String.format("%dµs", metrics.get(Metrics.TOTAL_TIME) / metrics.get(Metrics.ITERATION_COUNT) / 1000));
         System.out.println("├──────────────────────────┼─────────┬─────────┤");
-        System.out.println(String.format(
-                "│ \u001B[31m%24s\u001B[0m │ \u001B[31m%7s\u001B[0m │ \u001B[31m%7s\u001B[0m │",
-                "STAGE", "TIME", "PERCENT"));
+        System.out.printf(
+                "│ \u001B[31m%24s\u001B[0m │ \u001B[31m%7s\u001B[0m │ \u001B[31m%7s\u001B[0m │%n",
+                "STAGE", "TIME", "PERCENT");
         System.out.println("├──────────────────────────┼─────────┼─────────┤");
-        System.out.println(String.format(format,
+        System.out.printf(format,
                 "INITIALISATION",
                 nsToMs(Metrics.INIT_TIME),
-                percentage(Metrics.INIT_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.INIT_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "FINDING RANDOM NUMBERS",
                 nsToMs(Metrics.FIND_RANDOM_NUMBER_TIME),
-                percentage(Metrics.FIND_RANDOM_NUMBER_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.FIND_RANDOM_NUMBER_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "CONSTRUCTING CHANNEL",
                 nsToMs(Metrics.BUILD_CHANNEL_TIME),
-                percentage(Metrics.BUILD_CHANNEL_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.BUILD_CHANNEL_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "CALCULATING INTERMODS",
                 nsToMs(Metrics.CALCULATE_INTERMODS_TIME),
-                percentage(Metrics.CALCULATE_INTERMODS_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.CALCULATE_INTERMODS_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "CALCULATING CONFLICTS",
                 nsToMs(Metrics.CALCULATE_CONFLICTS_TIME),
-                percentage(Metrics.CALCULATE_CONFLICTS_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.CALCULATE_CONFLICTS_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "MERGING INTERMODS",
                 nsToMs(Metrics.MERGE_INTERMODS_TIME),
-                percentage(Metrics.MERGE_INTERMODS_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.MERGE_INTERMODS_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "COPYING MAP",
                 nsToMs(Metrics.COPY_MAP_TIME),
-                percentage(Metrics.COPY_MAP_TIME, Metrics.TOTAL_TIME)));
-        System.out.println(String.format(format,
+                percentage(Metrics.COPY_MAP_TIME, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "RESTORING ANALYSIS",
                 nsToMs(Metrics.RESTORE_ANALYSIS_TIME),
-                percentage(Metrics.RESTORE_ANALYSIS_TIME, Metrics.TOTAL_TIME)));
+                percentage(Metrics.RESTORE_ANALYSIS_TIME, Metrics.TOTAL_TIME));
         System.out.println("├──────────────────────────┼─────────┼─────────┤");
-        System.out.println(String.format(format,
+        System.out.printf(format,
                 "TOTAL",
                 metrics.get(Metrics.TOTAL_TIME) / 1000000,
                 100 * (metrics.get(Metrics.FIND_RANDOM_NUMBER_TIME)
@@ -807,7 +805,7 @@ final class Analyser {
                         + metrics.get(Metrics.MERGE_INTERMODS_TIME)
                         + metrics.get(Metrics.COPY_MAP_TIME)
                         + metrics.get(Metrics.RESTORE_ANALYSIS_TIME))
-                        / (double) metrics.get(Metrics.TOTAL_TIME)));
+                        / (double) metrics.get(Metrics.TOTAL_TIME));
         System.out.println("└──────────────────────────┴─────────┴─────────┘");
     }
 

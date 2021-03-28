@@ -158,13 +158,13 @@ class CoordinationTests {
         @Test
         final void testTestDuplicateChannel() throws InvalidFrequencyException {
             double[] frequencies = new double[]{ 780.125, 780.550, 780.900, 781.125, 781.375, 781.775 };
-            for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            for (Double frequency : frequencies) {
+                coordination.addChannel(frequency, equipmentProfiles.get(0));
             }
             assertEquals(19, coordination.getNumConflicts());
 
             NewChannelReport channelReport = coordination.testChannel(780.900, equipmentProfiles.get(3));
-            assertEquals(true, channelReport.isDuplicate());
+            assertTrue(channelReport.isDuplicate());
             assertEquals(Channel.Validity.INVALID, channelReport.isValid());
             assertEquals(10, channelReport.getConflicts());
         }
@@ -173,13 +173,13 @@ class CoordinationTests {
         @Test
         final void testTestValidChannel() throws InvalidFrequencyException {
             double[] frequencies = new double[]{ 546.45, 582.625, 618.5, 629, 663.275, 790.575, 861.125 };
-            for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            for (Double frequency : frequencies) {
+                coordination.addChannel(frequency, equipmentProfiles.get(0));
             }
             assertEquals(0, coordination.getNumConflicts());
 
             NewChannelReport channelReport = coordination.testChannel(788.875, equipmentProfiles.get(3));
-            assertEquals(false, channelReport.isDuplicate());
+            assertFalse(channelReport.isDuplicate());
             assertEquals(Channel.Validity.VALID, channelReport.isValid());
             assertEquals(0, channelReport.getConflicts());
         }
@@ -204,8 +204,8 @@ class CoordinationTests {
         @Test
         final void testSortCoordinationByFrequency() throws InvalidFrequencyException {
             double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
-            for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
+            for (Double frequency : frequencies) {
+                coordination.addChannel(frequency, equipmentProfiles.get(4));
             }
             coordination.setSortBy(Coordination.SortBy.FREQUENCY);
             coordination.sort();
@@ -219,8 +219,8 @@ class CoordinationTests {
         @Test
         final void testNullSortCoordinationByID() throws InvalidFrequencyException {
             double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
-            for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
+            for (Double frequency : frequencies) {
+                coordination.addChannel(frequency, equipmentProfiles.get(4));
             }
             coordination.setSortBy(null);
             coordination.sort();
@@ -234,8 +234,8 @@ class CoordinationTests {
         @Test
         final void testSortCoordinationByID() throws InvalidFrequencyException {
             double[] frequencies = new double[]{ 450, 440, 780, 900, 55, 350, 650, 490 };
-            for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(4));
+            for (Double frequency : frequencies) {
+                coordination.addChannel(frequency, equipmentProfiles.get(4));
             }
             coordination.setSortBy(Coordination.SortBy.FREQUENCY);
             coordination.sort();
@@ -380,8 +380,8 @@ class CoordinationTests {
                     907.050, 918.200, 922.900, 923.350, 939.875, 947.675
             };
 
-            for (int i = 0; i < frequencies.length; i++) {
-                coordination.addChannel(frequencies[i], equipmentProfiles.get(0));
+            for (Double frequency : frequencies) {
+                coordination.addChannel(frequency, equipmentProfiles.get(0));
             }
 
             assertEquals(36, coordination.getAnalyser().getConflictList().size());
@@ -735,8 +735,8 @@ class CoordinationTests {
                     606.200, 606.600, 607.300, 608.175, 608.525, 609.350,
                     611.525, 611.825, 612.275, 613.275, 613.925
                 };
-                for (int i = 0; i < frequencies.length; i++) {
-                    coordination.addChannel(frequencies[i], equipment);
+                for (Double frequency : frequencies) {
+                    coordination.addChannel(frequency, equipment);
                 }
                 assertEquals(0, coordination.getNumConflicts());
             }

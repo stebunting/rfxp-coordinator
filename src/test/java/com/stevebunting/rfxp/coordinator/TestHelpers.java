@@ -40,18 +40,4 @@ class TestHelpers {
         final int thirdOrder = numChannels * (numChannels - 1) * (numChannels - 2) / 2 * thirdOrderMultiplier;
         return secondOrder + thirdOrder;
     }
-
-    interface Predicate<T> {
-        boolean test(T t);
-    }
-
-    static <T> int count(List<T> list, Predicate<T> predicate) {
-        int count = 0;
-        for (int i = 0; i < list.size(); i++) {
-            if (predicate.test(list.get(i))) {
-                count++;
-            }
-        }
-        return count;
-    }
 }

@@ -68,8 +68,8 @@ class AnalyserTests {
         ));
         Collections.shuffle(frequencies);
 
-        for (int i = 0; i < frequencies.size(); i++) {
-            analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
+        for (Double frequency : frequencies) {
+            analyser.addChannel(new Channel(null, frequency, equipment));
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
             TestHelpers.assertIsSorted(analyser.getIntermodList());
         }
@@ -95,8 +95,8 @@ class AnalyserTests {
         ));
         Collections.shuffle(frequencies);
 
-        for (int i = 0; i < frequencies.size(); i++) {
-            analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
+        for (Double frequency : frequencies) {
+            analyser.addChannel(new Channel(null, frequency, equipment));
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
             TestHelpers.assertIsSorted(analyser.getIntermodList());
         }
@@ -204,6 +204,10 @@ class AnalyserTests {
         Equipment sennheiser = equipmentProfiles.get(2);
         Equipment uhfr = equipmentProfiles.get(10);
 
+        if (ias == null || sennheiser == null || uhfr == null) {
+            fail("Did not get valid equipment");
+        }
+
         analyser.addChannel(new Channel(null, 578, sennheiser));
         analyser.addChannel(new Channel(null, 590.2, sennheiser));
         analyser.addChannel(new Channel(null, 584.65, sennheiser));
@@ -244,19 +248,19 @@ class AnalyserTests {
         ));
         Collections.shuffle(frequencies);
 
-        for (int i = 0; i < frequencies.size(); i++) {
+        for (Double frequency : frequencies) {
             final int channelsBefore = analyser.getChannelList().size();
             final int intermodsBefore = analyser.getIntermodList().size();
             final int conflictsBefore = analyser.getConflictList().size();
 
-            final int newConflicts = analyser.checkArtifacts(new Channel(null, frequencies.get(i), equipment));
+            final int newConflicts = analyser.checkArtifacts(new Channel(null, frequency, equipment));
             final int expectedConflicts = analyser.getConflictList().size() + newConflicts;
 
             assertEquals(channelsBefore, analyser.getChannelList().size());
             assertEquals(intermodsBefore, analyser.getIntermodList().size());
             assertEquals(conflictsBefore, analyser.getConflictList().size());
 
-            analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
+            analyser.addChannel(new Channel(null, frequency, equipment));
             assertEquals(expectedConflicts, analyser.getConflictList().size());
             assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
             TestHelpers.assertIsSorted(analyser.getIntermodList());

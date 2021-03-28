@@ -21,6 +21,7 @@ final class Range {
         return hi;
     }
 
+    @NotNull
     final String getName() {
         return name;
     }

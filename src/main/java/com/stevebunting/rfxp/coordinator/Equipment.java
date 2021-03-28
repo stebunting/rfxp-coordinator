@@ -111,10 +111,12 @@ public class Equipment {
         return range;
     }
 
+    @NotNull
     final String getManufacturer() {
         return manufacturer;
     }
 
+    @NotNull
     final String getModel() {
         return model;
     }
