@@ -9,7 +9,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 50,
   "frontEndFilterType": "TRACKING",
-  "frontEndFilter": 100000
+  "frontEndFilter": 100000,
+  "ranges": []
 }, {
   "manufacturer": "Generic",
   "model": "Microphone",
@@ -21,7 +22,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 50,
   "frontEndFilterType": "TRACKING",
-  "frontEndFilter": 100000
+  "frontEndFilter": 100000,
+  "ranges": []
 }, {
   "manufacturer": "Sennheiser",
   "model": "2000 IEM",
@@ -33,7 +35,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 200,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 50000
+  "frontEndFilter": 50000,
+  "ranges": []
 }, {
   "manufacturer": "Sennheiser",
   "model": "2000 Mic",
@@ -45,7 +48,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 0,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 50000
+  "frontEndFilter": 50000,
+  "ranges": []
 }, {
   "manufacturer": "Sennheiser",
   "model": "EM6000",
@@ -57,7 +61,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 0,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 50000
+  "frontEndFilter": 50000,
+  "ranges": []
 }, {
   "manufacturer": "Sennheiser",
   "model": "G3/G4 IEM",
@@ -69,7 +74,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 200,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 50000
+  "frontEndFilter": 50000,
+  "ranges": []
 }, {
   "manufacturer": "Sennheiser",
   "model": "G3/G4 Mic",
@@ -81,7 +87,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 0,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 50000
+  "frontEndFilter": 50000,
+  "ranges": []
 }, {
   "manufacturer": "Shure",
   "model": "Axient Digital",
@@ -93,7 +100,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 0,
   "frontEndFilterType": "TRACKING",
-  "frontEndFilter": 70000
+  "frontEndFilter": 70000,
+  "ranges": []
 }, {
   "manufacturer": "Shure",
   "model": "PSM900",
@@ -105,7 +113,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 50,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 50000
+  "frontEndFilter": 50000,
+  "ranges": []
 }, {
   "manufacturer": "Shure",
   "model": "PSM1000",
@@ -117,7 +126,8 @@
   "spacing2t9o": 0,
   "spacing3t3o": 50,
   "frontEndFilterType": "TRACKING",
-  "frontEndFilter": 62000
+  "frontEndFilter": 62000,
+  "ranges": []
 }, {
   "manufacturer": "Shure",
   "model": "UHF-R",
@@ -129,7 +139,16 @@
   "spacing2t9o": 0,
   "spacing3t3o": 50,
   "frontEndFilterType": "TRACKING",
-  "frontEndFilter": 25000
+  "frontEndFilter": 25000,
+  "ranges": [
+    { "lo": 470125, "hi": 529875, "name": "G1E" },
+    { "lo": 518000, "hi": 578000, "name": "H4E" },
+    { "lo": 578000, "hi": 638000, "name": "J5E" },
+    { "lo": 606125, "hi": 665875, "name": "K4E" },
+    { "lo": 638000, "hi": 698000, "name": "L3E" },
+    { "lo": 694125, "hi": 757875, "name": "M5E" },
+    { "lo": 740000, "hi": 814000, "name": "Q5" }
+  ]
 }, {
   "manufacturer": "Shure",
   "model": "ULX-D",
@@ -141,5 +160,6 @@
   "spacing2t9o": 0,
   "spacing3t3o": 0,
   "frontEndFilterType": "FIXED",
-  "frontEndFilter": 100000
+  "frontEndFilter": 100000,
+  "ranges": []
 }]

@@ -556,7 +556,8 @@ final class Analyser {
     final List<Integer> addNewChannels(
             final int num,
             @NotNull final Equipment equipment,
-            final boolean printReport
+            final boolean printReport,
+            final Range range
     ) throws InvalidFrequencyException {
         // Generate and populate list of possible frequencies
         resetMetrics();
@@ -565,24 +566,24 @@ final class Analyser {
         HashMap<Integer, Integer> possibleFrequencies = new HashMap<>();
 
         // Initialise possible frequencies
-        int counter = equipment.getRange().getLo();
-        while (counter <= equipment.getRange().getHi()) {
+        int counter = range.getLo();
+        while (counter <= range.getHi()) {
             possibleFrequencies.put(counter, counter);
             counter += equipment.getTuningAccuracy();
         }
 
         for (Channel channel : channels) {
-            removeConflictRange(equipment, channel, possibleFrequencies);
+            removeConflictRange(equipment, channel, possibleFrequencies,range);
         }
 
         for (Intermod im : intermods) {
-            removeConflictRange(equipment, im, possibleFrequencies);
+            removeConflictRange(equipment, im, possibleFrequencies, range);
         }
 
         List<Integer> newFrequencies = new ArrayList<>();
         metrics.put(Metrics.INIT_TIME, System.nanoTime() - startTime);
 
-        newChannel(num, equipment, possibleFrequencies, newFrequencies);
+        newChannel(num, equipment, possibleFrequencies, newFrequencies, range);
         metrics.put(Metrics.TOTAL_TIME, System.nanoTime() - startTime);
 
         if (printReport) {
@@ -609,7 +610,8 @@ final class Analyser {
             @NotNull final HashMap<Integer, Integer> possibleFrequencies,
             final int frequency,
             @NotNull final Equipment equipment,
-            @NotNull final List<Intermod> intermods
+            @NotNull final List<Intermod> intermods,
+            @NotNull final Range range
     ) {
         if (possibleFrequencies == null) {
             return null;
@@ -629,13 +631,13 @@ final class Analyser {
             }
         }
 
-        if (intermods == null) {
+        if (intermods == null || range == null) {
             return newMap;
         }
 
         // Remove intermods
         for (Intermod im : intermods) {
-            removeConflictRange(equipment, im, newMap);
+            removeConflictRange(equipment, im, newMap, range);
         }
 
         return newMap;
@@ -653,7 +655,8 @@ final class Analyser {
     final void removeConflictRange(
             @NotNull final Equipment equipment,
             @NotNull final FrequencyComponent component,
-            @NotNull final Map<Integer, Integer> possibleFrequencies
+            @NotNull final Map<Integer, Integer> possibleFrequencies,
+            @NotNull final Range range
     ) {
         if (equipment == null || component == null || possibleFrequencies == null) {
             return;
@@ -667,8 +670,8 @@ final class Analyser {
         final int rangeHi = component.getFreq() + spacing;
         final int startFreq = equipment.getTuningAccuracy() * (int) Math.ceil((1 + rangeLo) / (double) equipment.getTuningAccuracy());
 
-        // This can be refined, very rough
-        if (rangeHi < equipment.getRange().getLo() || rangeLo > equipment.getRange().getHi()) {
+        // TODO: Reinstate, This can be refined, very rough
+        if (rangeHi < range.getLo() || rangeLo > range.getHi()) {
             return;
         }
 
@@ -681,7 +684,8 @@ final class Analyser {
             final int num,
             final Equipment equipment,
             final HashMap<Integer, Integer> possibleFrequencies,
-            final List<Integer> newFrequencies
+            final List<Integer> newFrequencies,
+            @NotNull final Range range
     ) throws InvalidFrequencyException {
         if (num == 0) {
             return true;
@@ -729,9 +733,9 @@ final class Analyser {
 
                 // Update Possible Frequencies and iterate
                 startTime = System.nanoTime();
-                final HashMap<Integer, Integer> newMap = clonePossibleFrequencies(possibleFrequencies, newFrequency, equipment, newIntermods);
+                final HashMap<Integer, Integer> newMap = clonePossibleFrequencies(possibleFrequencies, newFrequency, equipment, newIntermods, range);
                 metrics.put(Metrics.COPY_MAP_TIME, metrics.get(Metrics.COPY_MAP_TIME) + System.nanoTime() - startTime);
-                boolean valid = newChannel(num - 1, equipment, newMap, newFrequencies);
+                boolean valid = newChannel(num - 1, equipment, newMap, newFrequencies, range);
 
                 // Restore analysis
                 startTime = System.nanoTime();

@@ -24,25 +24,12 @@ class EquipmentTests {
         @DisplayName("ensure validity of frequency without range")
         @Test
         final void testFrequencyValidity() {
-            assert(equipment.isFrequencyValid(500750));
+            assertTrue(equipment.isFrequencyValid(500750));
+            assertTrue(equipment.isFrequencyValid(900000));
+            assertTrue(equipment.isFrequencyValid(560275));
+            assertTrue(equipment.isFrequencyValid(500750));
             assertFalse(equipment.isFrequencyValid(500751));
-        }
-
-        @DisplayName("ensure validity of frequency with range")
-        @Test
-        final void testFrequencyValidityWithRange() {
-            Range range = new Range(400000, 500000, "Generic");
-            Equipment equipment = new Equipment("Shure", "PSM900", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100, range);
-            assert(equipment.isFrequencyValid(450025));
-            assertFalse(equipment.isFrequencyValid(450026));
-            assert(equipment.isFrequencyValid(400000));
-            assertFalse(equipment.isFrequencyValid(399999));
-            assertFalse(equipment.isFrequencyValid(399975));
-            assert(equipment.isFrequencyValid(500000));
-            assertFalse(equipment.isFrequencyValid(500001));
-            assertFalse(equipment.isFrequencyValid(500025));
-            assertFalse(equipment.isFrequencyValid(200300));
-            assertFalse(equipment.isFrequencyValid(800075));
+            assertFalse(equipment.isFrequencyValid(452874));
         }
 
         @DisplayName("measure equality for each component between 2 equipment objects")
@@ -64,17 +51,10 @@ class EquipmentTests {
             assertNotEquals(equipment, new Equipment("Shure", "PSM900", 25, 300, 200, 190, 100, 75, 50, Equipment.FrontEndType.TRACKING, 200000));
         }
 
-        @DisplayName("get human readable description of equipment without range")
+        @DisplayName("get human readable description of equipment")
         @Test
-        final void testToStringNoRange() {
+        final void testToString() {
             assertEquals("Shure PSM900", equipment.toString());
-        }
-
-        @DisplayName("get human readable description of equipment with range")
-        @Test
-        final void testToStringWithRange() {
-            equipment.setRange(new Range(400, 500, "GB"));
-            assertEquals("Shure PSM900 GB", equipment.toString());
         }
 
         @DisplayName("get human readable description of equipment (no model)")
@@ -95,14 +75,6 @@ class EquipmentTests {
 
             equipment = new Equipment(null, "PSM900", 0, 0, 0, 0, 0, 0, 0, Equipment.FrontEndType.TRACKING, 100000);
             assertEquals("PSM900", equipment.toString());
-        }
-
-        @DisplayName("get human readable description of equipment (empty range)")
-        @Test
-        final void testToStringEmptyRange() {
-
-            equipment.setRange(new Range(400, 500, ""));
-            assertEquals("Shure PSM900", equipment.toString());
         }
 
         @DisplayName("get manufacturer name")

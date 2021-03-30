@@ -373,12 +373,13 @@ final class Coordination {
     final void addNewChannels(
             final int num,
             @NotNull final Equipment equipment,
-            final boolean printReport
+            final boolean printReport,
+            final Range range
     ) throws InvalidFrequencyException {
         if (equipment == null) {
             return;
         }
-        for (Integer freq : analyser.addNewChannels(num, equipment, printReport)) {
+        for (Integer freq : analyser.addNewChannels(num, equipment, printReport, range)) {
             addChannel(Channel.kHzToMHz(freq), equipment);
         }
     }

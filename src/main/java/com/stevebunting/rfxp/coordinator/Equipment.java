@@ -31,11 +31,24 @@ public class Equipment {
     private final int frontEndFilter;
 
     // Tuning range
-    private Range range;
+    private final Range[] ranges;
 
-    // CONSTRUCTORS
-    // Constructor to create equipment profile
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    Equipment(final String manufacturer,
+              final String model,
+              final int tuningAccuracy,
+              final int spacingChannel,
+              final int spacing2t3o,
+              final int spacing2t5o,
+              final int spacing2t7o,
+              final int spacing2t9o,
+              final int spacing3t3o,
+              final FrontEndType frontEndFilterType,
+              final int frontEndFilter) {
+        this(manufacturer, model, tuningAccuracy, spacingChannel, spacing2t3o, spacing2t5o, spacing2t7o, spacing2t9o,
+        spacing3t3o, frontEndFilterType, frontEndFilter, new Range[]{});
+    }
+
+    @JsonCreator
     Equipment(@JsonProperty("manufacturer") final String manufacturer,
               @JsonProperty("model") final String model,
               @JsonProperty("tuningAccuracy") final int tuningAccuracy,
@@ -45,23 +58,9 @@ public class Equipment {
               @JsonProperty("spacing2t7o") final int spacing2t7o,
               @JsonProperty("spacing2t9o") final int spacing2t9o,
               @JsonProperty("spacing3t3o") final int spacing3t3o,
-              @JsonProperty("frontEndFilterType") @NotNull final FrontEndType frontEndFilterType,
-              @JsonProperty("frontEndFilter") final int frontEndFilter) {
-        this(manufacturer, model, tuningAccuracy, spacingChannel, spacing2t3o, spacing2t5o, spacing2t7o, spacing2t9o, spacing3t3o, frontEndFilterType, frontEndFilter, null);
-    }
-
-    Equipment(@NotNull final String manufacturer,
-              @NotNull final String model,
-              final int tuningAccuracy,
-              final int spacingChannel,
-              final int spacing2t3o,
-              final int spacing2t5o,
-              final int spacing2t7o,
-              final int spacing2t9o,
-              final int spacing3t3o,
-              @NotNull final Equipment.FrontEndType frontEndFilterType,
-              final int frontEndFilter,
-              final Range range) {
+              @JsonProperty("frontEndFilterType") final FrontEndType frontEndFilterType,
+              @JsonProperty("frontEndFilter") final int frontEndFilter,
+              @JsonProperty("ranges") final Range[] ranges) {
         this.manufacturer = manufacturer != null ? manufacturer : "";
         this.model = model != null ? model : "";
         this.tuningAccuracy = tuningAccuracy;
@@ -74,12 +73,11 @@ public class Equipment {
         this.maxImSpacing = Math.max(Math.max(Math.max(Math.max(spacing2t3o, spacing2t5o), spacing2t7o), spacing2t9o), spacing3t3o);
         this.frontEndFilterType = frontEndFilterType;
         this.frontEndFilter = frontEndFilter;
-        this.range = range;
+        this.ranges = ranges;
     }
 
     final boolean isFrequencyValid(final int frequency) {
-        return (range == null || (frequency >= range.getLo() && frequency <= range.getHi()))
-                && (frequency % tuningAccuracy == 0);
+        return frequency % tuningAccuracy == 0;
     }
 
     // OBJECT OVERRIDES
@@ -106,22 +104,10 @@ public class Equipment {
     // Print object
     @Override
     public String toString() {
-        final String rangePostfix = range != null && !range.getName().equals("")
-                ? String.format(" %s", range.getName())
-                : "";
         final String stringFormat = manufacturer.equals("") || model.equals("")
-                ? "%s%s%s"
-                : "%s %s%s";
-        return String.format(stringFormat, manufacturer, model, rangePostfix);
-    }
-
-    // GETTERS AND SETTERS
-    final void setRange(final Range range) {
-        this.range = range;
-    }
-
-    final Range getRange() {
-        return range;
+                ? "%s%s"
+                : "%s %s";
+        return String.format(stringFormat, manufacturer, model);
     }
 
     @NotNull
@@ -175,5 +161,9 @@ public class Equipment {
 
     public int getFrontEndFilter() {
         return frontEndFilter;
+    }
+
+    public Range[] getRanges() {
+        return ranges;
     }
 }
