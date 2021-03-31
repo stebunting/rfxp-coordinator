@@ -57,7 +57,8 @@ class ChannelTests {
 
         // Channel under test
         Channel channel;
-        final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000);
+        Range range = new Range(450000, 550000, "Test Range");
+        final Equipment equipment = new Equipment("Sennheiser", "SR2050", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100000, new Range[]{range});
 
         @BeforeEach
         void setUp() throws InvalidFrequencyException {
@@ -74,8 +75,7 @@ class ChannelTests {
         @DisplayName("throw error when trying to set invalid frequency/equipment combination (in kHz)")
         @Test
         final void testSetInvalidFrequencyKHz() {
-            assertThrows(InvalidFrequencyException.class,
-                    () -> channel.setFreq(670253));
+            assertThrows(InvalidFrequencyException.class, () -> channel.setFreq(670253));
         }
 
         @DisplayName("set new frequency (in MHz)")
@@ -88,8 +88,7 @@ class ChannelTests {
         @DisplayName("throw error when trying to set invalid frequency/equipment combination (in MHz)")
         @Test
         final void testSetInvalidFrequencyMHz() {
-            assertThrows(InvalidFrequencyException.class,
-                    () -> channel.setFreq(1.054));
+            assertThrows(InvalidFrequencyException.class, () -> channel.setFreq(1.054));
         }
 
         @DisplayName("set new name")
@@ -106,6 +105,19 @@ class ChannelTests {
             channel.setEquipment(newEquipment);
             assertEquals(channel.getEquipment(), newEquipment);
             assertNotEquals(channel.getEquipment(), equipment);
+        }
+
+        @DisplayName("reset range on new equipment")
+        @Test
+        final void testResetRangeOnSetEquipment() throws InvalidFrequencyException {
+            channel.setRange(range);
+            assertEquals(range, channel.getRange());
+
+            Equipment newEquipment = new Equipment("Shure", "PSM900", 50, 500, 200, 100, 50, 40, 80, Equipment.FrontEndType.TRACKING, 100000);
+            channel.setEquipment(newEquipment);
+            assertEquals(channel.getEquipment(), newEquipment);
+            assertNotEquals(channel.getEquipment(), equipment);
+            assertNull(channel.getRange());
         }
 
         @DisplayName("throw when setting new equipment as null")
@@ -358,6 +370,62 @@ class ChannelTests {
             assertSame(channel.getEquipment(), channelCopy.getEquipment());
             assertEquals(channel.getNumConflicts(), channelCopy.getNumConflicts());
             assertEquals(channel.getValidity(), channelCopy.getValidity());
+        }
+    }
+
+    @DisplayName("has range methods that...")
+    @Nested
+    public class ChannelRangeTests {
+
+        Channel channel;
+        Equipment equipment;
+        EquipmentProfiles equipmentList = EquipmentProfiles.INSTANCE;
+
+        @BeforeEach
+        void setUp() throws InvalidFrequencyException {
+            equipment = equipmentList.get("shure", "uhf-r");
+            if (equipment == null) {
+                fail("Could not get equipment type");
+            }
+            channel = new Channel(null, 647.55, equipment);
+        }
+
+        @DisplayName("get assignable ranges from equipment")
+        @Test
+        final void testGetAssignableRanges()  {
+            List<Range> ranges = channel.getAssignableRanges();
+            assertEquals(2, ranges.size());
+            assertEquals("K4E", ranges.get(0).getName());
+            assertEquals("L3E", ranges.get(1).getName());
+        }
+
+        @DisplayName("assigns valid range from equipment")
+        @Test
+        final void testAssignsValidRange()  {
+            List<Range> ranges = channel.getAssignableRanges();
+            Range k4e = ranges.get(0);
+            assertEquals("K4E", k4e.getName());
+            channel.setRange(k4e);
+            assertEquals(k4e, channel.getRange());
+        }
+
+        @DisplayName("throws assigning invalid range")
+        @Test
+        final void testAssignsInvalidRange()  {
+            Range invalid = new Range(600000, 700000, "Invalid Range");
+            assertThrows(IllegalArgumentException.class, () -> channel.setRange(invalid));
+        }
+
+        @DisplayName("throws assigning null range")
+        @Test
+        final void testAssigningNullRange()  {
+            assertThrows(IllegalArgumentException.class, () -> channel.setRange(null));
+        }
+
+        @DisplayName("get null range")
+        @Test
+        final void testGetNullRange()  {
+            assertNull(channel.getRange());
         }
     }
 

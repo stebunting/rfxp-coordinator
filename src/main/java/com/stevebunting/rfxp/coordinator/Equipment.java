@@ -3,6 +3,7 @@ package com.stevebunting.rfxp.coordinator;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
+import java.util.Arrays;
 
 public class Equipment {
 
@@ -74,6 +75,7 @@ public class Equipment {
         this.frontEndFilterType = frontEndFilterType;
         this.frontEndFilter = frontEndFilter;
         this.ranges = ranges;
+        Arrays.sort(this.ranges);
     }
 
     final boolean isFrequencyValid(final int frequency) {
@@ -163,7 +165,12 @@ public class Equipment {
         return frontEndFilter;
     }
 
-    public Range[] getRanges() {
+    final Range[] getRanges() {
         return ranges;
+    }
+
+    final boolean isValidRange(@NotNull final Range range) {
+        int index = Arrays.binarySearch(ranges, range);
+        return index >= 0;
     }
 }

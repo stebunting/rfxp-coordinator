@@ -28,6 +28,7 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
 
     // Equipment object to store equipment profile
     private Equipment equipment;
+    private Range range;
 
     // Channel validity
     private Validity validity;
@@ -160,6 +161,7 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         }
         this.frequency = frequency;
         this.equipment = equipment;
+        this.range = null;
     }
 
     @NotNull
@@ -208,5 +210,30 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
 
     final List<Conflict> getConflicts() {
         return conflicts;
+    }
+
+    final List<Range> getAssignableRanges() {
+        List<Range> ranges = new ArrayList<>();
+        for (Range range: equipment.getRanges()) {
+            if (range.isValidFrequency(frequency)) {
+                ranges.add(range);
+            }
+        }
+        return ranges;
+    }
+
+    final void setRange(@NotNull final Range range) {
+        if (range == null || !equipment.isValidRange(range)) {
+            throw new IllegalArgumentException();
+        }
+        this.range = range;
+    }
+
+    final Range getRange() {
+        return range;
+    }
+
+    final static String getPrintableFrequency(final int frequency) {
+        return String.format("%.3f MHz", kHzToMHz(frequency));
     }
 }
