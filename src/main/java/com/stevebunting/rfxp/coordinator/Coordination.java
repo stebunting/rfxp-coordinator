@@ -96,7 +96,7 @@ final class Coordination {
             return;
         }
         channelToRestore.setName(editChannelBackup.getName());
-        channelToRestore.setFreqAndEquipment(editChannelBackup.getFreq(), editChannelBackup.getEquipment());
+        channelToRestore.setFreqAndEquipment(editChannelBackup.getFreq(), editChannelBackup.getEquipment(), editChannelBackup.getRange());
         analyser.updateChannel(channelToRestore);
     }
 
@@ -214,7 +214,7 @@ final class Coordination {
         // Check for duplicates
         boolean isDuplicate = false;
         for (Channel channel : channels) {
-            if (channel.getFreq() == Channel.mHzToKHz(frequency)) {
+            if (channel.getFreq() == Channel.mhzToKhz(frequency)) {
                 isDuplicate = true;
                 break;
             }
@@ -380,7 +380,7 @@ final class Coordination {
             return;
         }
         for (Integer freq : analyser.addNewChannels(num, equipment, printReport, range)) {
-            addChannel(Channel.kHzToMHz(freq), equipment);
+            addChannel(Channel.khzToMhz(freq), equipment);
         }
     }
 }

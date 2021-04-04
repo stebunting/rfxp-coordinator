@@ -6,47 +6,31 @@ import java.util.List;
 import java.util.Locale;
 
 class Channel implements Comparable<Channel>, FrequencyComponent {
+    static final Locale locale = Locale.getDefault();
 
-    // Enum for declaring validity of channel
+    private final int id;
+    private int frequency;
+    private String name;
+    private Equipment equipment;
+    private Range range;
+
     enum Validity {
         VALID,
         INVALID,
         WARNING
     }
-
-    // Locale for string formatting
-    private final Locale locale = Locale.getDefault();
-
-    // Integer to store channel ID
-    private final int id;
-
-    // Integer to store frequency (kHz)
-    private int frequency;
-
-    // String to store name
-    private String name;
-
-    // Equipment object to store equipment profile
-    private Equipment equipment;
-    private Range range;
-
-    // Channel validity
     private Validity validity;
 
-    // Array to store channels conflicts
     private final ArrayList<Conflict> conflicts = new ArrayList<>();
 
-    // Constructor to create channel with frequency
-    Channel(
-            final Integer id,
+    Channel(final Integer id,
             final double frequency,
             @NotNull final Equipment equipment
     ) throws InvalidFrequencyException {
         this(id, frequency, String.format("Channel %d", id != null ? id + 1 : 1), equipment);
     }
 
-    Channel(
-            final Integer id,
+    Channel(final Integer id,
             final double frequency,
             @NotNull final String name,
             @NotNull final Equipment equipment
@@ -54,32 +38,39 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         if (equipment == null) {
             throw new IllegalArgumentException("A valid equipment profile must be supplied");
         }
-        if (!equipment.isFrequencyValid(mHzToKHz(frequency))) {
+        if (!equipment.isFrequencyValid(mhzToKhz(frequency))) {
             throw new InvalidFrequencyException();
         }
-        this.frequency = mHzToKHz(frequency);
+        this.frequency = mhzToKhz(frequency);
         this.equipment = equipment;
         this.id = id != null ? id : 0;
         this.name = name;
         setValidity();
     }
 
-    // Method to return a new channel instance with the same data
-    // Equipment is still a reference to the master equipment array
+    private void setValidity() {
+        if (conflicts.isEmpty()) {
+            validity = Validity.VALID;
+        } else if (conflicts.size() == 1 && conflicts.get(0).getType() == Conflict.Type.WHITE_SPACE) {
+            validity = Validity.WARNING;
+        } else {
+            validity = Validity.INVALID;
+        }
+    }
+
     final Channel deepCopy() {
         Channel channelCopy;
         try {
-            channelCopy = new Channel(id, kHzToMHz(frequency), name, equipment);
+            channelCopy = new Channel(id, khzToMhz(frequency), name, equipment);
         } catch (InvalidFrequencyException e) {
             return null;
         }
-        for (Conflict conflict: conflicts) {
+        for (Conflict conflict : conflicts) {
             channelCopy.addConflict(conflict);
         }
         return channelCopy;
     }
 
-    // COMPARING METHODS
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Channel)) {
@@ -98,23 +89,13 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
 
     @Override
     public final String toString() {
-        return String.format(locale, "%.3f", kHzToMHz(frequency));
+        return String.format(locale, "%.3f", khzToMhz(frequency));
     }
 
     final String toStringWithMHz() {
-        return String.format(locale, "%s MHz", toString());
+        return formattedFrequency(frequency);
     }
 
-    // HELPER FUNCTIONS
-    static int mHzToKHz(double frequency) {
-        return (int) Math.round(frequency * 1000);
-    }
-
-    static double kHzToMHz(int frequency) {
-        return ((double) frequency) / 1000;
-    }
-
-    // GETTERS AND SETTERS
     final int getId() {
         return id;
     }
@@ -127,8 +108,7 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         this.name = name;
     }
 
-    // Return frequency in kHz
-    final public int getFreq() {
+    public final int getFreq() {
         return frequency;
     }
 
@@ -136,23 +116,26 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         return equipment;
     }
 
-    final void setFreq(int frequency) throws InvalidFrequencyException {
-        setFreqAndEquipment(frequency, equipment);
+    final void setFreq(final double frequency) throws InvalidFrequencyException {
+        setFreq(mhzToKhz(frequency));
     }
 
-    final void setFreq(double frequency) throws InvalidFrequencyException {
-        setFreqAndEquipment(frequency, equipment);
+    final void setFreq(final int frequency) throws InvalidFrequencyException {
+        if (range != null && !range.isValidFrequency(frequency)) {
+            throw new InvalidFrequencyException();
+        }
+        setFreqAndEquipment(frequency, equipment, range);
     }
 
     final void setEquipment(@NotNull final Equipment equipment) throws InvalidFrequencyException {
-        setFreqAndEquipment(this.frequency, equipment);
+        setFreqAndEquipment(this.frequency, equipment, null);
     }
 
-    final void setFreqAndEquipment(double frequency, @NotNull final Equipment equipment) throws InvalidFrequencyException {
-        setFreqAndEquipment(mHzToKHz(frequency), equipment);
-    }
-
-    final void setFreqAndEquipment(int frequency, @NotNull final Equipment equipment) throws InvalidFrequencyException {
+    final void setFreqAndEquipment(
+            int frequency,
+            @NotNull final Equipment equipment,
+            @NotNull final Range range
+    ) throws InvalidFrequencyException {
         if (equipment == null) {
             throw new IllegalArgumentException("Equipment must not be null");
         }
@@ -161,7 +144,7 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         }
         this.frequency = frequency;
         this.equipment = equipment;
-        this.range = null;
+        this.range = range;
     }
 
     @NotNull
@@ -169,21 +152,6 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         return validity;
     }
 
-    private void setValidity() {
-        if (conflicts.isEmpty()) {
-            validity = Validity.VALID;
-        } else if (conflicts.size() == 1 && conflicts.get(0).getType() == Conflict.Type.WHITE_SPACE) {
-            validity = Validity.WARNING;
-        } else {
-            validity = Validity.INVALID;
-        }
-    }
-
-    /**
-     * Add a reference to a relevant conflict to the channels conflict list.
-     *
-     * @param conflict conflict to add
-     */
     final void addConflict(final Conflict conflict) {
         if (conflict != null) {
             conflicts.add(conflict);
@@ -233,7 +201,15 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         return range;
     }
 
-    final static String getPrintableFrequency(final int frequency) {
-        return String.format("%.3f MHz", kHzToMHz(frequency));
+    static int mhzToKhz(double frequency) {
+        return (int) Math.round(frequency * 1000);
+    }
+
+    static double khzToMhz(int frequency) {
+        return ((double) frequency) / 1000;
+    }
+
+    static String formattedFrequency(final int frequency) {
+        return String.format(locale, "%.3f MHz", khzToMhz(frequency));
     }
 }

@@ -48,7 +48,7 @@ final class Range implements Comparable<Range> {
     public String toString() {
         return String.format("%s (%s - %s)",
                 name,
-                Channel.getPrintableFrequency(lo),
-                Channel.getPrintableFrequency(hi));
+                Channel.formattedFrequency(lo),
+                Channel.formattedFrequency(hi));
     }
 }

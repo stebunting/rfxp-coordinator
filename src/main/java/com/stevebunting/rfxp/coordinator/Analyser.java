@@ -709,7 +709,7 @@ final class Analyser {
 
             // Build Test Channel
             startTime = System.nanoTime();
-            testChannel = new Channel(null, Channel.kHzToMHz(newFrequency), equipment);
+            testChannel = new Channel(null, Channel.khzToMhz(newFrequency), equipment);
             metrics.put(Metrics.BUILD_CHANNEL_TIME, metrics.get(Metrics.BUILD_CHANNEL_TIME) + System.nanoTime() - startTime);
 
             // Get intermods

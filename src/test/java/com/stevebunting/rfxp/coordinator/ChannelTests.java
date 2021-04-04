@@ -525,21 +525,21 @@ class ChannelTests {
         @DisplayName("convert frequency in MHz to kHz")
         @Test
         final void testMHzToKHz() {
-            assertEquals(500550, Channel.mHzToKHz(500.550));
-            assertEquals(636200, Channel.mHzToKHz(636.2));
-            assertEquals(780559, Channel.mHzToKHz(780.558999273947234));
-            assertEquals(100000, Channel.mHzToKHz(100));
-            assertEquals(-689245, Channel.mHzToKHz(-689.245));
+            assertEquals(500550, Channel.mhzToKhz(500.550));
+            assertEquals(636200, Channel.mhzToKhz(636.2));
+            assertEquals(780559, Channel.mhzToKhz(780.558999273947234));
+            assertEquals(100000, Channel.mhzToKhz(100));
+            assertEquals(-689245, Channel.mhzToKhz(-689.245));
         }
 
         @DisplayName("convert frequency in kHz to MHz")
         @Test
         final void testKHzToMHz() {
-            assertEquals(640.240, Channel.kHzToMHz(640240));
-            assertEquals(489.124, Channel.kHzToMHz(489124));
-            assertEquals(224.009, Channel.kHzToMHz(224009));
-            assertEquals(0.0, Channel.kHzToMHz(0));
-            assertEquals(-0.789, Channel.kHzToMHz(-789));
+            assertEquals(640.240, Channel.khzToMhz(640240));
+            assertEquals(489.124, Channel.khzToMhz(489124));
+            assertEquals(224.009, Channel.khzToMhz(224009));
+            assertEquals(0.0, Channel.khzToMhz(0));
+            assertEquals(-0.789, Channel.khzToMhz(-789));
         }
 
         @DisplayName("convert kHz <--> MHz without losing information")
@@ -548,11 +548,11 @@ class ChannelTests {
             final int numTests = 1000;
             for (int i = 0; i < numTests; i++) {
                 int freq = TestHelpers.generateFrequency(470000, 800000, 1);
-                assertEquals(freq, Channel.mHzToKHz(Channel.kHzToMHz(freq)));
+                assertEquals(freq, Channel.mhzToKhz(Channel.khzToMhz(freq)));
             }
             for (int i = 0; i < numTests; i++) {
-                double freq = Channel.kHzToMHz(TestHelpers.generateFrequency(470000, 800000, 1));
-                assertEquals(freq, Channel.kHzToMHz(Channel.mHzToKHz(freq)));
+                double freq = Channel.khzToMhz(TestHelpers.generateFrequency(470000, 800000, 1));
+                assertEquals(freq, Channel.khzToMhz(Channel.mhzToKhz(freq)));
             }
         }
     }

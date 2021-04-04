@@ -247,7 +247,7 @@ class CoordinationTests {
             coordination.sort();
             channelList = coordination.getChannels();
             for (int i = 0; i < channelList.length; i++) {
-                assertEquals(Channel.mHzToKHz(frequencies[i]), channelList[i].getFreq());
+                assertEquals(Channel.mhzToKhz(frequencies[i]), channelList[i].getFreq());
             }
         }
 
@@ -765,7 +765,7 @@ class CoordinationTests {
                 final int equipmentIndex = (int) Math.floor(Math.random() * equipmentProfiles.getCount());
                 final Equipment equipment = equipmentProfiles.get(equipmentIndex);
                 assertNotNull(equipment);
-                final double frequency = Channel.kHzToMHz(TestHelpers.generateFrequency(500000, 538000, equipment.getTuningAccuracy()));
+                final double frequency = Channel.khzToMhz(TestHelpers.generateFrequency(500000, 538000, equipment.getTuningAccuracy()));
 
                 // Add or remove a channel
                 if (i % 4 != 2) {
@@ -791,7 +791,7 @@ class CoordinationTests {
             Coordination coordinationCheck = new Coordination();
             Channel[] channelArray = coordination.getChannels();
             for (Channel channel : channelArray) {
-                coordinationCheck.addChannel(Channel.kHzToMHz(channel.getFreq()), channel.getEquipment());
+                coordinationCheck.addChannel(Channel.khzToMhz(channel.getFreq()), channel.getEquipment());
             }
             assertEquals(coordination.getNumChannels(), coordinationCheck.getNumChannels());
             assertEquals(coordination.getNumIntermods(), coordinationCheck.getNumIntermods());
