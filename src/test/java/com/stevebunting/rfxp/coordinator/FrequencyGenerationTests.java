@@ -3,9 +3,9 @@ package com.stevebunting.rfxp.coordinator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.ArrayList;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Frequency generator...")
 class FrequencyGenerationTests {
@@ -20,67 +20,59 @@ class FrequencyGenerationTests {
         equipment = new Equipment("Test", "Equipment", 25, 300, 100, 90, 0, 0, 50, Equipment.FrontEndType.TRACKING, 100);
     }
 
-    @DisplayName("generates 2 valid frequencies")
+    @DisplayName("throws on channel with no range")
     @Test
-    final void testGenerate2Frequencies() throws InvalidFrequencyException {
-        coordination.addNewChannels(2, equipment, false, range);
-        assertEquals(2, coordination.getChannels().length);
-        assertEquals(2, coordination.getAnalyser().getValidChannels());
-        assertEquals(0, coordination.getAnalyser().getConflictList().size());
-        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
+    final void testThrowsOnChannelWithNoRange() throws InvalidFrequencyException {
+        final List<Channel> frequenciesToUpdate = new ArrayList<>();
+        frequenciesToUpdate.add(new Channel(null, 687, equipment));
+
+        assertThrows(ChannelMissingRangeException.class,
+                () -> coordination.updateFrequencies(frequenciesToUpdate));
     }
 
-    @DisplayName("generates 3 valid frequencies")
+    @DisplayName("generates 11 frequencies in 8MHz range")
     @Test
-    final void testGenerate3Frequencies() throws InvalidFrequencyException {
-        coordination.addNewChannels(3, equipment, false, range);
-        assertEquals(3, coordination.getChannels().length);
-        assertEquals(3, coordination.getAnalyser().getValidChannels());
-        assertEquals(0, coordination.getAnalyser().getConflictList().size());
-        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
-    }
+    final void testGenerates11FrequenciesIn8MHz() throws InvalidFrequencyException, ChannelMissingRangeException {
+        final Equipment uhfr = new Equipment("Shure", "UHF-R", 25, 325, 175, 0, 0, 0, 50, Equipment.FrontEndType.TRACKING, 25, new Range[]{new Range(606000, 614000, "Channel 38")});
 
-    @DisplayName("generates 4 valid frequencies")
-    @Test
-    final void testGenerate4Frequencies() throws InvalidFrequencyException {
-        coordination.addNewChannels(4, equipment, false, range);
-        assertEquals(4, coordination.getChannels().length);
-        assertEquals(4, coordination.getAnalyser().getValidChannels());
-        assertEquals(0, coordination.getAnalyser().getConflictList().size());
-        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
-    }
+        final List<Channel> frequenciesToUpdate = new ArrayList<>();
 
-    @DisplayName("generates 6 valid frequencies")
-    @Test
-    final void testGenerate6Frequencies() throws InvalidFrequencyException {
-        coordination.addNewChannels(6, equipment, false, range);
-        assertEquals(6, coordination.getChannels().length);
-        assertEquals(6, coordination.getAnalyser().getValidChannels());
-        assertEquals(0, coordination.getAnalyser().getConflictList().size());
-        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
-    }
+        for (int i = 0; i < 11; i++) {
+            int id = coordination.addChannel(606, uhfr);
+            Channel channel = coordination.getChannelById(id);
+            List<Range> ranges = channel.getAssignableRanges();
+            channel.setRange(ranges.get(0));
+            frequenciesToUpdate.add(channel);
+        }
 
-    @DisplayName("generates 11 valid frequencies in 1 TV Channel")
-    @Test
-    final void testGenerate11Frequencies() throws InvalidFrequencyException {
-        coordination.addNewChannels(11, equipment, false, range);
-        assertEquals(11, coordination.getChannels().length);
+        assertTrue(coordination.getNumConflicts() > 0);
+        assertEquals(0, coordination.getAnalyser().getValidChannels());
+
+        coordination.updateFrequencies(frequenciesToUpdate);
+        System.out.println(coordination);
+
+        assertEquals(0, coordination.getNumConflicts());
+        assertEquals(0, coordination.getAnalyser().getConflictList().size());
         assertEquals(11, coordination.getAnalyser().getValidChannels());
-        assertEquals(0, coordination.getAnalyser().getConflictList().size());
-        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
     @DisplayName("generates 21 valid frequencies in 606-648MHz")
     @Test
-    final void testGenerate21Frequencies() throws InvalidFrequencyException {
-        Range range = new Range(606000, 648000, "Higher Range");
+    final void testGenerate21Frequencies() throws InvalidFrequencyException, ChannelMissingRangeException {
+        final Range range = new Range(606000, 648000, "Higher Range");
+        final Equipment uhfr = new Equipment("Shure", "UHF-R", 25, 325, 175, 0, 0, 0, 50, Equipment.FrontEndType.TRACKING, 25, new Range[]{range});
 
-        coordination.addNewChannels(21, equipment, false, range);
+        final List<Channel> frequenciesToUpdate = new ArrayList<>();
+
+        for (int i = 0; i < 21; i++) {
+            int id = coordination.addChannel(606, uhfr);
+            Channel channel = coordination.getChannelById(id);
+            channel.setRange(range);
+            frequenciesToUpdate.add(channel);
+        }
+
+        coordination.updateFrequencies(frequenciesToUpdate);
+
         assertEquals(21, coordination.getChannels().length);
         assertEquals(21, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
@@ -88,32 +80,27 @@ class FrequencyGenerationTests {
         assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
     }
 
-    @DisplayName("generates valid frequencies with 2 existing channels")
-    @Test
-    final void testGenerateFrequenciesWith2ExistingChannels() throws InvalidFrequencyException {
-        Range range = new Range(718000, 726000, "Higher Range");
-
-        coordination.addChannel(720, equipment);
-        coordination.addChannel(720.3, equipment);
-
-        coordination.addNewChannels(9, equipment, false, range);
-        assertEquals(11, coordination.getChannels().length);
-        assertEquals(11, coordination.getAnalyser().getValidChannels());
-        assertEquals(0, coordination.getAnalyser().getConflictList().size());
-        assertEquals(0, coordination.getAnalyser().getNumChannelConflicts());
-        assertEquals(0, coordination.getAnalyser().getNumIMConflicts());
-    }
-
     @DisplayName("generates valid frequencies with 3 existing channels")
     @Test
-    final void testGenerateFrequenciesWith3ExistingChannels() throws InvalidFrequencyException {
-        Range range = new Range(470000, 474000, "Higher Range");
-
+    final void testGenerateFrequenciesWith3ExistingChannels() throws InvalidFrequencyException, ChannelMissingRangeException {
         coordination.addChannel(470, equipment);
         coordination.addChannel(473.975, equipment);
         coordination.addChannel(471.775, equipment);
 
-        coordination.addNewChannels(5, equipment, false, range);
+        Range range = new Range(470000, 474000, "Higher Range");
+        final Equipment uhfr = new Equipment("Shure", "UHF-R", 25, 325, 175, 0, 0, 0, 50, Equipment.FrontEndType.TRACKING, 25, new Range[]{range});
+
+        final List<Channel> frequenciesToUpdate = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            int id = coordination.addChannel(718, uhfr);
+            Channel channel = coordination.getChannelById(id);
+            channel.setRange(range);
+            frequenciesToUpdate.add(channel);
+        }
+
+        coordination.updateFrequencies(frequenciesToUpdate);
+
         assertEquals(8, coordination.getChannels().length);
         assertEquals(8, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
@@ -123,13 +110,14 @@ class FrequencyGenerationTests {
 
     @DisplayName("generates valid frequencies with existing coordination")
     @Test
-    final void testGenerateFrequenciesWithExistingCoordination() throws InvalidFrequencyException {
+    final void testGenerateFrequenciesWithExistingCoordination() throws InvalidFrequencyException, ChannelMissingRangeException {
         Equipment sennheiserIEM = EquipmentProfiles.INSTANCE.get("sennheiser", "2000 iem");
         Equipment shureUHFR = EquipmentProfiles.INSTANCE.get("shure", "uhf-r");
         if (sennheiserIEM == null || shureUHFR == null) {
             fail("Could not get equipment models from Equipment Profiles");
         }
-        final Range k4e = new Range(606000, 666000, "K4E");
+        final Range k4e = shureUHFR.getRanges()[3];
+        assertEquals("K4E", k4e.getName());
 
         double[] frequencies = new double[]{
                 516.150, 517.475, 522.725, 526.150, 530.200, 532.975, 534.500,
@@ -142,11 +130,18 @@ class FrequencyGenerationTests {
         assertEquals(0, coordination.getNumConflicts());
         assertEquals(13, coordination.getNumChannels());
 
-        coordination.addNewChannels(20, shureUHFR, true, k4e);
-        Channel[] channels = coordination.getChannels();
-        Arrays.sort(channels);
-        System.out.println(Arrays.toString(channels));
-        System.out.printf("FREQUENCIES FOUND: %d%n", coordination.getChannels().length);
+        final List<Channel> frequenciesToUpdate = new ArrayList<>();
+
+        for (int i = 0; i < 20; i++) {
+            int id = coordination.addChannel(
+                    Channel.khzToMhz(TestHelpers.generateFrequency(607000, 665000, 25)),
+                    shureUHFR);
+            Channel channel = coordination.getChannelById(id);
+            channel.setRange(k4e);
+            frequenciesToUpdate.add(channel);
+        }
+
+        coordination.updateFrequencies(frequenciesToUpdate);
         assertEquals(33, coordination.getChannels().length);
         assertEquals(33, coordination.getAnalyser().getValidChannels());
         assertEquals(0, coordination.getAnalyser().getConflictList().size());
@@ -156,13 +151,14 @@ class FrequencyGenerationTests {
 
     @DisplayName("generates valid frequencies with existing bad coordination")
     @Test
-    final void testGenerateFrequenciesWithExistingBadCoordination() throws InvalidFrequencyException {
+    final void testGenerateFrequenciesWithExistingBadCoordination() throws InvalidFrequencyException, ChannelMissingRangeException {
         Equipment sennheiserIEM = EquipmentProfiles.INSTANCE.get("sennheiser", "2000 iem");
         Equipment shureUHFR = EquipmentProfiles.INSTANCE.get("shure", "uhf-r");
         if (sennheiserIEM == null || shureUHFR == null) {
             fail("Could not get equipment models from Equipment Profiles");
         }
-        final Range k4e = new Range(606000, 666000, "K4E");
+        final Range k4e = shureUHFR.getRanges()[3];
+        assertEquals("K4E", k4e.getName());
 
         double[] frequencies = new double[]{
                 718.175, 725.050, 745.650, 747.075, 755.100, 756.525,
@@ -178,7 +174,18 @@ class FrequencyGenerationTests {
         assertEquals(17, coordination.getNumChannels());
         assertEquals(13, coordination.getAnalyser().getValidChannels());
 
-        coordination.addNewChannels(14, shureUHFR, false, k4e);
+        final List<Channel> frequenciesToUpdate = new ArrayList<>();
+
+        for (int i = 0; i < 14; i++) {
+            int id = coordination.addChannel(
+                    Channel.khzToMhz(TestHelpers.generateFrequency(607000, 665000, 25)),
+                    shureUHFR);
+            Channel channel = coordination.getChannelById(id);
+            channel.setRange(k4e);
+            frequenciesToUpdate.add(channel);
+        }
+
+        coordination.updateFrequencies(frequenciesToUpdate);
         assertEquals(31, coordination.getChannels().length);
         assertEquals(27, coordination.getAnalyser().getValidChannels());
         assertEquals(4, coordination.getAnalyser().getConflictList().size());

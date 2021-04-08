@@ -201,6 +201,10 @@ class Channel implements Comparable<Channel>, FrequencyComponent {
         return range;
     }
 
+    final boolean hasRange() {
+        return range != null;
+    }
+
     static int mhzToKhz(double frequency) {
         return (int) Math.round(frequency * 1000);
     }

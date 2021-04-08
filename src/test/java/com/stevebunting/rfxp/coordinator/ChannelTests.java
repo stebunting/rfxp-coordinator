@@ -427,6 +427,20 @@ class ChannelTests {
         final void testGetNullRange()  {
             assertNull(channel.getRange());
         }
+
+        @DisplayName("return true if channel has a range")
+        @Test
+        final void testHasRange()  {
+            List<Range> ranges = channel.getAssignableRanges();
+            channel.setRange(ranges.get(0));
+            assertTrue(channel.hasRange());
+        }
+
+        @DisplayName("return false if channel doesn't have a range")
+        @Test
+        final void testDoesntHaveRange()  {
+            assertFalse(channel.hasRange());
+        }
     }
 
     @DisplayName("can be sorted...")

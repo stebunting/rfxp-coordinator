@@ -118,29 +118,37 @@ final class Coordination {
         final int id = idCounter++;
 
         final Channel newChannel = new Channel(id, frequency, equipment);
-        channels.add(newChannel);
-        analyser.addChannel(newChannel);
+        return addChannel(newChannel);
+    }
 
-        return id;
+    final int addChannel(@NotNull final Channel channel) {
+        channels.add(channel);
+        analyser.addChannel(channel);
+
+        return channel.getId();
     }
 
     /**
      * Update a channels frequency.
      *
-     * @param id ID of channel to update
+     * @param channelToUpdate Channel to update
      * @param frequency new channel frequency in MHz
      * @return the channel object
      * @throws InvalidFrequencyException on invalid frequency / equipment combination
      */
+    final Channel updateChannel(final Channel channelToUpdate, final double frequency) throws InvalidFrequencyException {
+        channelToUpdate.setFreq(frequency);
+        analyser.updateChannel(channelToUpdate);
+
+        return channelToUpdate;
+    }
+
     final Channel updateChannel(final int id, final double frequency) throws InvalidFrequencyException {
         final Channel channelToUpdate = getChannelById(id);
         if (channelToUpdate == null) {
             return null;
         }
-        channelToUpdate.setFreq(frequency);
-        analyser.updateChannel(channelToUpdate);
-
-        return channelToUpdate;
+        return updateChannel(channelToUpdate, frequency);
     }
 
     /**
@@ -196,6 +204,12 @@ final class Coordination {
         analyser.removeChannel(removedChannel);
 
         return removedChannel;
+    }
+
+    final Channel removeChannel(@NotNull final Channel channel) {
+        channels.remove(channel);
+        analyser.removeChannel(channel);
+        return channel;
     }
 
     /**
@@ -370,17 +384,32 @@ final class Coordination {
         return analyser;
     }
 
-    final void addNewChannels(
-            final int num,
-            @NotNull final Equipment equipment,
-            final boolean printReport,
-            final Range range
-    ) throws InvalidFrequencyException {
-        if (equipment == null) {
-            return;
+    final void updateFrequencies(@NotNull final List<Channel> channelsToUpdate) throws InvalidFrequencyException, ChannelMissingRangeException {
+        for (Channel channel : channelsToUpdate) {
+            removeChannel(channel);
         }
-        for (Integer freq : analyser.addNewChannels(num, equipment, printReport, range)) {
-            addChannel(Channel.khzToMhz(freq), equipment);
+        List<Integer> newFrequencies = analyser.updateFrequencies(channelsToUpdate);
+        for (int i = 0; i < newFrequencies.size(); i++) {
+            Channel channel = channelsToUpdate.get(i);
+            channel.setFreq(newFrequencies.get(i));
+            addChannel(channel);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("┌────┬──────────────────────┬──────────────┐\n");
+        str.append("| ID |                 NAME |    FREQUENCY |\n");
+        str.append("├────┼──────────────────────┼──────────────┤\n");
+        for (Channel channel : channels) {
+            str.append(String.format(
+                    "| %2d | %20s | %12s |\n",
+                    channel.getId(),
+                    channel.getName(),
+                    channel.toStringWithMHz()));
+        }
+        str.append("└────┴──────────────────────┴──────────────┘\n");
+        return str.toString();
     }
 }
