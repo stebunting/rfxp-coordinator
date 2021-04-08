@@ -26,6 +26,7 @@ final class Analyser {
     // Metrics
     enum Metrics {
         ITERATION_COUNT,
+        INITIALISATION,
         GET_POSSIBLE_FREQUENCIES,
         FIND_RANDOM_NUMBER_TIME,
         CALCULATE_INTERMODS_TIME,
@@ -44,6 +45,7 @@ final class Analyser {
         numIMConflicts.put(Intermod.Type.IM_3T3O, 0);
 
         metrics.put(Metrics.ITERATION_COUNT, 0L);
+        metrics.put(Metrics.INITIALISATION, 0L);
         metrics.put(Metrics.GET_POSSIBLE_FREQUENCIES, 0L);
         metrics.put(Metrics.FIND_RANDOM_NUMBER_TIME, 0L);
         metrics.put(Metrics.CALCULATE_INTERMODS_TIME, 0L);
@@ -568,6 +570,10 @@ final class Analyser {
                 "STAGE", "TIME", "PERCENT");
         System.out.println("├──────────────────────────┼─────────┼─────────┤");
         System.out.printf(format,
+                "INITIALISATION",
+                nsToMs(Metrics.INITIALISATION),
+                percentage(Metrics.INITIALISATION, Metrics.TOTAL_TIME));
+        System.out.printf(format,
                 "GET POSSIBLE FREQUENCIES",
                 nsToMs(Metrics.GET_POSSIBLE_FREQUENCIES),
                 percentage(Metrics.GET_POSSIBLE_FREQUENCIES, Metrics.TOTAL_TIME));
@@ -591,7 +597,8 @@ final class Analyser {
         System.out.printf(format,
                 "TOTAL",
                 metrics.get(Metrics.TOTAL_TIME) / 1000000,
-                100 * (metrics.get(Metrics.GET_POSSIBLE_FREQUENCIES)
+                100 * (metrics.get(Metrics.INITIALISATION)
+                        + metrics.get(Metrics.GET_POSSIBLE_FREQUENCIES)
                         + metrics.get(Metrics.FIND_RANDOM_NUMBER_TIME)
                         + metrics.get(Metrics.CALCULATE_INTERMODS_TIME)
                         + metrics.get(Metrics.MERGE_INTERMODS_TIME)
@@ -602,6 +609,7 @@ final class Analyser {
 
     private void resetMetrics() {
         metrics.put(Metrics.ITERATION_COUNT, 0L);
+        metrics.put(Metrics.INITIALISATION, 0L);
         metrics.put(Metrics.GET_POSSIBLE_FREQUENCIES, 0L);
         metrics.put(Metrics.FIND_RANDOM_NUMBER_TIME, 0L);
         metrics.put(Metrics.CALCULATE_INTERMODS_TIME, 0L);
@@ -623,8 +631,13 @@ final class Analyser {
             if (!channel.hasRange()) {
                 throw new ChannelMissingRangeException();
             }
-            channelGeneratorWrappers.add(new ChannelGeneratorWrapper(channel));
+            ChannelGeneratorWrapper channelGeneratorWrapper = new ChannelGeneratorWrapper(channel);
+            channelGeneratorWrapper.getPossibleFrequencies(channels, intermods);
+            channelGeneratorWrappers.add(channelGeneratorWrapper);
         }
+        Collections.sort(channelGeneratorWrappers);
+        metrics.put(Analyser.Metrics.INITIALISATION, metrics.get(Analyser.Metrics.INITIALISATION) + System.nanoTime() - startTime);
+
         calculateNewChannelFrequency(0, channelGeneratorWrappers);
         metrics.put(Metrics.TOTAL_TIME, System.nanoTime() - startTime);
 

@@ -8,11 +8,12 @@ class ChannelGeneratorWrapper implements Comparable<ChannelGeneratorWrapper> {
 
     private final Channel channel;
     private Integer proposedFrequency;
-    private Map<Integer, Integer> possibleFrequencies;
+    private final Map<Integer, Integer> possibleFrequencies;
     private final int maxPossibleFrequencies;
 
     ChannelGeneratorWrapper(@NotNull final Channel channel) {
         this.channel = channel;
+        possibleFrequencies = new HashMap<>();
         maxPossibleFrequencies = calculateMaxPossibleFrequencies();
     }
 
@@ -42,7 +43,7 @@ class ChannelGeneratorWrapper implements Comparable<ChannelGeneratorWrapper> {
     }
 
     private void getBaseFrequencies() {
-        possibleFrequencies = new HashMap<>();
+        possibleFrequencies.clear();
 
         final Range range = channel.getRange();
         final Equipment equipment = channel.getEquipment();
@@ -105,12 +106,17 @@ class ChannelGeneratorWrapper implements Comparable<ChannelGeneratorWrapper> {
         return proposedFrequency;
     }
 
+    // TODO: Unnecessary?
     final int getMaxPossibleFrequencies() {
         return maxPossibleFrequencies;
     }
 
+    final int numPossibleFrequencies() {
+        return possibleFrequencies.size();
+    }
+
     @Override
     public int compareTo(@NotNull ChannelGeneratorWrapper that) {
-        return 0;
+        return Integer.compare(this.numPossibleFrequencies(), that.numPossibleFrequencies());
     }
 }
