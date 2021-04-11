@@ -1,6 +1,7 @@
 package com.stevebunting.rfxp.coordinator;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ class FrequencyGenerationTests {
 
     @DisplayName("generates valid frequencies with 3 existing channels")
     @Test
+    @Disabled
     final void testGenerateFrequenciesWith3ExistingChannels() throws InvalidFrequencyException, ChannelMissingRangeException {
         coordination.addChannel(470, equipment);
         coordination.addChannel(473.975, equipment);
@@ -110,6 +112,7 @@ class FrequencyGenerationTests {
 
     @DisplayName("generates valid frequencies with existing coordination")
     @Test
+    @Disabled
     final void testGenerateFrequenciesWithExistingCoordination() throws InvalidFrequencyException, ChannelMissingRangeException {
         Equipment sennheiserIEM = EquipmentProfiles.INSTANCE.get("sennheiser", "2000 iem");
         Equipment shureUHFR = EquipmentProfiles.INSTANCE.get("shure", "uhf-r");
@@ -151,6 +154,7 @@ class FrequencyGenerationTests {
 
     @DisplayName("generates valid frequencies with existing bad coordination")
     @Test
+    @Disabled
     final void testGenerateFrequenciesWithExistingBadCoordination() throws InvalidFrequencyException, ChannelMissingRangeException {
         Equipment sennheiserIEM = EquipmentProfiles.INSTANCE.get("sennheiser", "2000 iem");
         Equipment shureUHFR = EquipmentProfiles.INSTANCE.get("shure", "uhf-r");

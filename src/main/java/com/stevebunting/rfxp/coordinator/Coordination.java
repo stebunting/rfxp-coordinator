@@ -321,7 +321,7 @@ final class Coordination {
 
     // Get number of intermods
     public int getNumIntermods() {
-        return analyser.getIntermodList().size();
+        return analyser.getIntermodStore().size();
     }
 
     // Get number of conflicts

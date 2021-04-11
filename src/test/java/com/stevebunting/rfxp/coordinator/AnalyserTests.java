@@ -42,8 +42,8 @@ class AnalyserTests {
 
         for (int i = 0; i < frequencies.size(); i++) {
             analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
-            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-            TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
             assertEquals(i + 1, analyser.getValidChannels());
         }
 
@@ -70,8 +70,8 @@ class AnalyserTests {
 
         for (Double frequency : frequencies) {
             analyser.addChannel(new Channel(null, frequency, equipment));
-            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-            TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
         }
 
         assertEquals(frequencies.size(), analyser.getChannelList().size());
@@ -97,8 +97,8 @@ class AnalyserTests {
 
         for (Double frequency : frequencies) {
             analyser.addChannel(new Channel(null, frequency, equipment));
-            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-            TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
         }
 
         assertEquals(frequencies.size(), analyser.getChannelList().size());
@@ -131,7 +131,7 @@ class AnalyserTests {
 
                     assertEquals(validChannels[i], analyser.getValidChannels());
                     assertEquals(frequenciesToRemove.length - i - 1, analyser.getChannelList().size());
-                    assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
+                    assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
                     assertEquals(conflicts[i], analyser.getConflictList().size());
                     assertEquals(channelConflicts[i], analyser.getNumChannelConflicts());
                     assertEquals(im2t3oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T3O));
@@ -139,7 +139,7 @@ class AnalyserTests {
                     assertEquals(im2t7oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T7O));
                     assertEquals(im2t9oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_2T9O));
                     assertEquals(im3t3oConflicts[i], analyser.getNumIMConflicts(Intermod.Type.IM_3T3O));
-                    TestHelpers.assertIsSorted(analyser.getIntermodList());
+                    TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
                     break;
                 }
             }
@@ -156,8 +156,8 @@ class AnalyserTests {
 
         for (int i = 0; i < frequencies.size(); i++) {
             analyser.addChannel(new Channel(null, frequencies.get(i), equipment));
-            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-            TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
             assertEquals(i + 1, analyser.getValidChannels());
             assertEquals(0, analyser.getConflictList().size());
             assertEquals(0, analyser.getNumChannelConflicts());
@@ -181,8 +181,8 @@ class AnalyserTests {
             channelToUpdate.setFreq(newFrequencies.get(i));
             analyser.updateChannel(channelToUpdate);
 
-            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-            TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
             assertEquals(validChannels[i], analyser.getValidChannels());
         }
 
@@ -250,20 +250,20 @@ class AnalyserTests {
 
         for (Double frequency : frequencies) {
             final int channelsBefore = analyser.getChannelList().size();
-            final int intermodsBefore = analyser.getIntermodList().size();
+            final int intermodsBefore = analyser.getIntermodStore().size();
             final int conflictsBefore = analyser.getConflictList().size();
 
             final int newConflicts = analyser.checkArtifacts(new Channel(null, frequency, equipment));
             final int expectedConflicts = analyser.getConflictList().size() + newConflicts;
 
             assertEquals(channelsBefore, analyser.getChannelList().size());
-            assertEquals(intermodsBefore, analyser.getIntermodList().size());
+            assertEquals(intermodsBefore, analyser.getIntermodStore().size());
             assertEquals(conflictsBefore, analyser.getConflictList().size());
 
             analyser.addChannel(new Channel(null, frequency, equipment));
             assertEquals(expectedConflicts, analyser.getConflictList().size());
-            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodList().size());
-            TestHelpers.assertIsSorted(analyser.getIntermodList());
+            assertEquals(TestHelpers.expectedIntermods(analyser), analyser.getIntermodStore().size());
+            TestHelpers.assertIsSorted(analyser.getIntermodStore().getIntermodsArray());
         }
 
         assertEquals(frequencies.size(), analyser.getChannelList().size());

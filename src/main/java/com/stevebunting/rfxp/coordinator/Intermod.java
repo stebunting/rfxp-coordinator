@@ -1,7 +1,8 @@
 package com.stevebunting.rfxp.coordinator;
 
+import org.jetbrains.annotations.NotNull;
+
 class Intermod implements Comparable<Intermod>, FrequencyComponent {
-    // INSTANCE VARIABLES
     enum Type {
         IM_2T3O("2T3O"),
         IM_2T5O("2T5O"),
@@ -11,7 +12,7 @@ class Intermod implements Comparable<Intermod>, FrequencyComponent {
 
         private final String label;
 
-        Type(String label) {
+        Type(@NotNull final String label) {
             this.label = label;
         }
 
@@ -20,20 +21,16 @@ class Intermod implements Comparable<Intermod>, FrequencyComponent {
         }
     }
 
-    // Integer to store frequency (kHz)
     private final int frequency;
-
-    // String to store intermodulation type
-    private final Type type;
-
-    // Integer to store generator frequencies (kHz)
-    private final Channel f1;
-    private final Channel f2;
+    @NotNull private final Type type;
+    @NotNull private final Channel f1;
+    @NotNull private final Channel f2;
     private final Channel f3;
 
-    // CONSTRUCTORS
-    // Constructor to create second-order intermodulation
-    Intermod(Type type, Channel f1, Channel f2, Channel f3) {
+    Intermod(@NotNull final Type type,
+             @NotNull final Channel f1,
+             @NotNull final Channel f2,
+             final Channel f3) {
         if (type == null) {
             throw new IllegalArgumentException("Type may not be null");
         }
@@ -47,7 +44,7 @@ class Intermod implements Comparable<Intermod>, FrequencyComponent {
         this.f2 = f2;
         this.f3 = type == Type.IM_3T3O ? f3 : null;
         this.type = type;
-        switch (this.type) {
+        switch (type) {
             case IM_2T3O:
                 this.frequency = (2 * f1.getFreq()) - f2.getFreq();
                 break;
@@ -64,9 +61,12 @@ class Intermod implements Comparable<Intermod>, FrequencyComponent {
                 this.frequency = (5 * f1.getFreq()) - (4 * f2.getFreq());
                 break;
 
-            default:
             case IM_3T3O:
                 this.frequency = f1.getFreq() + f2.getFreq() - f3.getFreq();
+                break;
+
+            default:
+                this.frequency = -1;
                 break;
         }
     }
@@ -110,24 +110,23 @@ class Intermod implements Comparable<Intermod>, FrequencyComponent {
         return text.toString();
     }
 
-    // GETTERS AND SETTERS
     public int getFreq() {
         return frequency;
     }
 
-    public Type getType() {
+    final Type getType() {
         return type;
     }
 
-    public Channel getF1() {
+    final Channel getF1() {
         return f1;
     }
 
-    public Channel getF2() {
+    final Channel getF2() {
         return f2;
     }
 
-    public Channel getF3() {
+    final Channel getF3() {
         return f3;
     }
 }

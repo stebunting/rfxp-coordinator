@@ -9,7 +9,7 @@ import java.util.*;
  */
 final class Analyser {
     final private List<Channel> channels = new ArrayList<>();
-    private List<Intermod> intermods = new ArrayList<>();
+    private IntermodStore intermodStore = new IntermodStore();
     final private List<Conflict> conflicts = new ArrayList<>();
 
     final private AnalyserCalculations calculations = new AnalyserCalculations();
@@ -67,12 +67,12 @@ final class Analyser {
         channels.add(channel);
 
         // Calculate new intermods
-        List<Intermod> newIntermods = calculateIntermods(channel);
+        IntermodStore newIntermods = calculateIntermods(channel);
 
         // Generate intermod conflicts and merge intermods into list
-        getIMConflicts(channel, intermods, conflicts, true);
+        getIMConflicts(channel, intermodStore, conflicts, true);
         getIMConflicts(channels, newIntermods, conflicts, true);
-        intermods = mergeLists(intermods, newIntermods);
+        intermodStore.mergeIn(newIntermods);
 
         // Generate channel conflicts
         getChannelConflicts(channel, conflicts, true, true);
@@ -93,7 +93,7 @@ final class Analyser {
         final boolean channelRemoved = channels.remove(channel);
         if (channelRemoved) {
             removeConflicts(channel);
-            removeIntermods(channel);
+            intermodStore.remove(channel);
         }
         return channelRemoved;
     }
@@ -130,11 +130,11 @@ final class Analyser {
         }
 
         // Calculate new intermods
-        List<Intermod> newIntermods = calculateIntermods(channel);
+        IntermodStore newIntermods = calculateIntermods(channel);
 
         // Generate conflicts and add to a local list
         List<Conflict> newConflicts = new ArrayList<>();
-        getIMConflicts(channel, intermods, newConflicts, true);
+        getIMConflicts(channel, intermodStore, newConflicts, true);
         getIMConflicts(channels, newIntermods, newConflicts, false);
         getChannelConflicts(channel, newConflicts, true, false);
 
@@ -156,8 +156,8 @@ final class Analyser {
      * @return sorted list of intermodulations generated between newChannel and
      * all other channels in channels list
      */
-    private List<Intermod> calculateIntermods(@NotNull final Channel newChannel) {
-        final ArrayList<Intermod> newIntermods = new ArrayList<>();
+    private IntermodStore calculateIntermods(@NotNull final Channel newChannel) {
+        final IntermodStore newIntermods = new IntermodStore();
         final int numChannels = channels.size();
 
         for (int i = 0; i < numChannels; i++) {
@@ -193,7 +193,7 @@ final class Analyser {
                 }
             }
         }
-        newIntermods.sort(null);
+        newIntermods.sort();
         return newIntermods;
     }
 
@@ -228,57 +228,32 @@ final class Analyser {
         return mergedList;
     }
 
-    /**
-     * Method to find all channel/intermod conflicts from a list of channels
-     * and a list of intermods and add them to a list of conflicts. Adds
-     * conflicts to conflicts list and to relevant channel if flag is set.
-     *
-     * @param channels list of channels to test
-     * @param intermods list of intermodulations to test
-     * @param conflicts list to add generated conflicts to
-     * @param addConflictToChannel add conflict reference to channel if true
-     */
     private void getIMConflicts(
             @NotNull final List<Channel> channels,
-            @NotNull final List<Intermod> intermods,
+            @NotNull final IntermodStore intermodStore,
             @NotNull final List<Conflict> conflicts,
             final boolean addConflictToChannel
     ) {
-        if (channels.size() == 0 || intermods.size() == 0) {
+        if (channels.size() == 0 || intermodStore.isEmpty()) {
             return;
         }
         for (Channel channel : channels) {
-            getIMConflicts(channel, intermods, conflicts, addConflictToChannel);
+            getIMConflicts(channel, intermodStore, conflicts, addConflictToChannel);
         }
     }
 
-    /**
-     * Method to find all intermod conflicts with a new channel and an existing
-     * list of intermods and add them to a list of conflicts. Adds conflicts to
-     * conflicts list and to relevant channel if flag is set.
-     *
-     * @param channel channel to test
-     * @param intermods list of intermodulations to test
-     * @param conflicts list to add generated conflicts to
-     * @param addConflictToChannel add conflict reference to channel if true
-     */
     private void getIMConflicts(
             @NotNull final Channel channel,
-            @NotNull final List<Intermod> intermods,
+            @NotNull final IntermodStore intermodStore,
             @NotNull final List<Conflict> conflicts,
             final boolean addConflictToChannel
     ) {
-        final int rangeLo = channel.getFreq() - channel.getEquipment().getMaxImSpacing();
-        final int rangeHi = channel.getFreq() + channel.getEquipment().getMaxImSpacing();
+        final int lo = channel.getFreq() - channel.getEquipment().getMaxImSpacing();
+        final int hi = channel.getFreq() + channel.getEquipment().getMaxImSpacing();
 
-        // Starting index in intermod list
-        int imIndex = getNextImIndex(rangeLo, intermods);
-
-        // Loop over intermods until out of upper danger range of channel
-        while (imIndex < intermods.size() && intermods.get(imIndex).getFreq() < rangeHi) {
-            getChannelIMConflicts(channel, intermods.get(imIndex), conflicts, addConflictToChannel);
-            imIndex++;
-        }
+        intermodStore.forRange(lo, hi, (@NotNull final Intermod im) -> {
+            getChannelIMConflicts(channel, im, conflicts, addConflictToChannel);
+        });
     }
 
     /**
@@ -360,19 +335,6 @@ final class Analyser {
                 }
             }
         }
-    }
-
-    /**
-     * Method to remove all intermodulations from a list that are contributed
-     * by a specific channel.
-     *
-     * @param channel   channel object to test intermodulation list against
-     */
-    private void removeIntermods(@NotNull final Channel channel) {
-        intermods.removeIf((Intermod intermod) ->
-                intermod.getF1() == channel
-             || intermod.getF2() == channel
-             || intermod.getF3() == channel);
     }
 
     /**
@@ -459,58 +421,12 @@ final class Analyser {
         }
     }
 
-    /**
-     * Method to search recursively for first index to check in a list of
-     * intermodulations. Intermod must be first frequency in list higher than
-     * limitLo. Implements binary search methodology.
-     *
-     * @param limitLo limit of frequencies, frequency to find must be first
-     *                intermod with a frequency higher than this
-     * @param intermods list of intermods to search in
-     * @param start starting index
-     * @param end end index
-     * @return found index
-     */
-    private int getNextImIndex(
-            final int limitLo,
-            @NotNull final List<Intermod> intermods,
-            final int start,
-            final int end
-    ) {
-        if (start > end) {
-            return start;
-        }
-
-        final int mid = start + ((end - start) / 2);
-        if (intermods.get(mid).getFreq() <= limitLo) {
-            return mid + 1 < intermods.size() && intermods.get(mid + 1).getFreq() > limitLo
-                ? mid + 1
-                : getNextImIndex(limitLo, intermods, mid + 1, end);
-        } else {
-            return mid > 0 && intermods.get(mid - 1).getFreq() <= limitLo
-                ? mid
-                : getNextImIndex(limitLo, intermods, start, mid - 1);
-        }
-    }
-
-    /**
-     * Method to initiate getNextImIndex binary search
-     *
-     * @param limitLo limit of frequencies, frequency to find must be first
-     *                intermod with a frequency higher than this
-     * @param intermods list of intermods to search in
-     * @return found index
-     */
-    private int getNextImIndex(final int limitLo, final List<Intermod> intermods) {
-        return getNextImIndex(limitLo, intermods, 0, intermods.size() - 1);
-    }
-
     final List<Channel> getChannelList() {
         return channels;
     }
 
-    final List<Intermod> getIntermodList() {
-        return intermods;
+    final IntermodStore getIntermodStore() {
+        return intermodStore;
     }
 
     final List<Conflict> getConflictList() {
@@ -632,7 +548,7 @@ final class Analyser {
                 throw new ChannelMissingRangeException();
             }
             ChannelGeneratorWrapper channelGeneratorWrapper = new ChannelGeneratorWrapper(channel);
-            channelGeneratorWrapper.getPossibleFrequencies(channels, intermods);
+            channelGeneratorWrapper.getPossibleFrequencies(channels, intermodStore);
             channelGeneratorWrappers.add(channelGeneratorWrapper);
         }
         Collections.sort(channelGeneratorWrappers);
@@ -659,7 +575,7 @@ final class Analyser {
         Channel testChannel = channelToUpdate.getChannel();
 
         startTime = System.nanoTime();
-        channelToUpdate.getPossibleFrequencies(channels, intermods);
+        channelToUpdate.getPossibleFrequencies(channels, intermodStore);
         metrics.put(Analyser.Metrics.GET_POSSIBLE_FREQUENCIES, metrics.get(Analyser.Metrics.GET_POSSIBLE_FREQUENCIES) + System.nanoTime() - startTime);
 
         while (channelToUpdate.hasPossibleFrequencies()) {
@@ -670,17 +586,17 @@ final class Analyser {
             metrics.put(Metrics.FIND_RANDOM_NUMBER_TIME, metrics.get(Metrics.FIND_RANDOM_NUMBER_TIME) + System.nanoTime() - startTime);
 
             startTime = System.nanoTime();
-            List<Intermod> newIntermods = calculateIntermods(testChannel);
+            IntermodStore newIntermodStore = calculateIntermods(testChannel);
             newConflicts.clear();
-            getIMConflicts(channels, newIntermods, newConflicts, false);
+            getIMConflicts(channels, newIntermodStore, newConflicts, false);
             metrics.put(Metrics.CALCULATE_INTERMODS_TIME, metrics.get(Metrics.CALCULATE_INTERMODS_TIME) + System.nanoTime() - startTime);
 
             if (newConflicts.size() == 0) {
                 channels.add(testChannel);
 
                 startTime = System.nanoTime();
-                final List<Intermod> backupIntermods = intermods;
-                intermods = mergeLists(intermods, newIntermods);
+                intermodStore.pushToBackupStack();
+                intermodStore.mergeIn(newIntermodStore);
                 metrics.put(Metrics.MERGE_INTERMODS_TIME, metrics.get(Metrics.MERGE_INTERMODS_TIME) + System.nanoTime() - startTime);
 
                 updateGeneratedFrequencies(index, channelsToUpdate);
@@ -688,7 +604,7 @@ final class Analyser {
 
                 startTime = System.nanoTime();
                 channels.remove(testChannel);
-                intermods = backupIntermods;
+                intermodStore.popFromBackupStack();
                 metrics.put(Metrics.RESTORE_ANALYSIS_TIME, metrics.get(Metrics.RESTORE_ANALYSIS_TIME) + System.nanoTime() - startTime);
 
                 if (valid) {

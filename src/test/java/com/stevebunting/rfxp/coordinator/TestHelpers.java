@@ -21,9 +21,9 @@ class TestHelpers {
     }
 
     // Function to assert that a function is sorted
-    static <E extends Comparable<E>> void assertIsSorted(List<E> list) {
-        for (int i = 0; i < list.size() - 1; i++) {
-            assertTrue(list.get(i).compareTo(list.get(i + 1)) <= 0);
+    static <E extends Comparable<E>> void assertIsSorted(E[] array) {
+        for (int i = 0; i < array.length - 1; i++) {
+            assertTrue(array[i].compareTo(array[i + 1]) <= 0);
         }
     }
 

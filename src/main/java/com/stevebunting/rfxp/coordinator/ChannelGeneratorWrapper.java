@@ -30,14 +30,14 @@ class ChannelGeneratorWrapper implements Comparable<ChannelGeneratorWrapper> {
 
     final void getPossibleFrequencies(
             @NotNull final List<Channel> channels,
-            @NotNull final List<Intermod> intermods
+            @NotNull final IntermodStore intermodStore
     ) {
         getBaseFrequencies();
 
         for (Channel ch : channels) {
             removeConflictRange(ch);
         }
-        for (Intermod im : intermods) {
+        for (Intermod im : intermodStore) {
             removeConflictRange(im);
         }
     }
